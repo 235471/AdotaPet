@@ -3,13 +3,13 @@ import { EnderecoEntity } from './../entities/EnderecoEntity';
 import { InterfaceAdotanteRepository } from './interfaces/interfaceAdotanteRepository';
 import { Repository } from 'typeorm';
 import { notFound } from '../error/notFound';
-import { criarHashSenha } from '../utils/passwordHash';
 import { PetEntity } from '../entities/PetEntity';
 import { AdotanteFields } from '../constants/adotante.selectFields';
 import { createAdotanteQueryBuilder } from '../utils/queryBuilder';
 import { CustomError } from '../error/customError';
 import { plainToInstance } from 'class-transformer';
 import { EnderecoDto, EnderecoDTOFormatted } from '../dto/endereco.dto';
+import { AdotanteDTOFormatted } from '../dto/adotante.dto';
 
 export class AdotanteRepository implements InterfaceAdotanteRepository {
   private repository: Repository<AdotanteEntity>;
@@ -18,7 +18,7 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
     this.repository = repository;
   }
 
-  async listAdotanteSemSenha(): Promise<AdotanteEntity[]> {
+  async listAdotanteSemSenha(): Promise<AdotanteDTOFormatted[]> {
     const queryBuilder = createAdotanteQueryBuilder(
       this.repository,
       AdotanteFields.selectFields,
@@ -33,14 +33,16 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
             excludeExtraneousValues: true,
           });
         }
-        return adotante;
+        return plainToInstance(AdotanteDTOFormatted, adotante, {
+          excludeExtraneousValues: true,
+        });
       });
     } catch (err) {
       throw new CustomError('Erro ao listar adotantes', 500, err);
     }
   }
 
-  async findById(id: number): Promise<AdotanteEntity> {
+  async findById(id: number): Promise<AdotanteDTOFormatted> {
     const queryBuilder = createAdotanteQueryBuilder(
       this.repository,
       AdotanteFields.selectFields,
@@ -54,48 +56,10 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
     if (!adotante) {
       throw notFound('Adotante não encontrado com o id: ', { id });
     }
-    return adotante;
-  }
 
-  async findByEmail(email: string): Promise<AdotanteEntity> {
-    const queryBuilder = createAdotanteQueryBuilder(
-      this.repository,
-      AdotanteFields.selectFieldsWithSenha,
-      AdotanteFields.joinRelations
-    );
-
-    queryBuilder.where('adotante.email = :email', { email });
-
-    const user = await queryBuilder.getOne();
-
-    if (!user) {
-      throw notFound('Adotante não cadastrado com o email: ', { email });
-    }
-    return user;
-  }
-
-  async createAdotante(adotante: AdotanteEntity): Promise<void> {
-    const hash = await criarHashSenha(adotante.senha);
-    adotante.senha = hash;
-    try {
-      await this.repository.save(adotante);
-    } catch (err) {
-      throw new CustomError('Erro ao criar adotante', 500, err);
-    }
-  }
-
-  async updateAdotante(id: number, adotante: Partial<AdotanteEntity>): Promise<void> {
-    try {
-      const queryBuilder = this.repository.createQueryBuilder(AdotanteFields.alias);
-      queryBuilder.where('adotante.id = :id', { id });
-
-      const isAdotante = await queryBuilder.getOne();
-      if (!isAdotante) throw notFound('Adotante não encontrado com o id: ', { id });
-
-      await this.repository.update(id, adotante);
-    } catch (err) {
-      throw new CustomError('Erro ao atualizar adotante', 500, err);
-    }
+    return plainToInstance(AdotanteDTOFormatted, adotante, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async deleteAdotante(id: number): Promise<void> {
@@ -133,7 +97,7 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
     }
   }
 
-  async updateEndereco(id: number, endereco: EnderecoDto): Promise<AdotanteEntity> {
+  async updateEndereco(id: number, endereco: EnderecoDto): Promise<AdotanteDTOFormatted> {
     try {
       const queryBuilder = createAdotanteQueryBuilder(
         this.repository,
@@ -155,7 +119,10 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
       }
 
       await this.repository.save(adotante);
-      return adotante;
+
+      return plainToInstance(AdotanteDTOFormatted, adotante, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
       throw new CustomError('Erro ao atualizar endereço', 500, err);
     }

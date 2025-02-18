@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PetEntity } from '../entities/PetEntity';
 import { IPetController } from '../interface/PetController';
 import { PetRepository } from '../repository/PetRepository';
+import { validatePorte } from '../utils/validatePorte';
 
 export class PetController implements IPetController {
   constructor(private repository: PetRepository) {}
@@ -21,6 +22,33 @@ export class PetController implements IPetController {
       const listPets = await this.repository.listPet();
       res.status(200).json(listPets);
     } catch (err: unknown) {
+      next(err);
+    }
+  }
+
+  async listByPorte(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const porte = req.query.porte as PetEntity['porte'];
+      if (porte) {
+        validatePorte(porte);
+        const listPorte = await this.repository.filterByPorte(porte);
+        res.status(200).json(listPorte);
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async listBy(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { campo, valor } = req.query;
+
+      const listPet = await this.repository.filterBy(
+        campo as keyof PetEntity,
+        valor as PetEntity[keyof PetEntity]
+      );
+      res.status(200).json(listPet);
+    } catch (err) {
       next(err);
     }
   }

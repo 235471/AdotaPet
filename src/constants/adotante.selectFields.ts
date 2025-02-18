@@ -3,25 +3,26 @@ export const AdotanteFields = {
   alias: 'adotante',
   selectFields: [
     'adotante.id',
-    'adotante.nome',
-    'adotante.email',
-    'adotante.celular',
+    'usuario.nome',
+    'usuario.email',
+    'usuario.celular',
     'adotante.endereco',
     'endereco.cidade',
     'endereco.estado',
   ],
   selectFieldsWithSenha: [
     'adotante.id',
-    'adotante.nome',
-    'adotante.email',
-    'adotante.senha',
-    'adotante.celular',
+    'usuario.nome',
+    'usuario.email',
+    'usuario.senha',
+    'usuario.celular',
     'adotante.endereco',
     'endereco.cidade',
     'endereco.estado',
   ],
   joinRelations: [
     { relation: 'adotante.pets', alias: 'pet' }, // Relação com pets
-    { relation: 'adotante.endereco', alias: 'endereco' } // Relação com endereco
+    { relation: 'adotante.endereco', alias: 'endereco' }, // Relação com endereco
+    { relation: 'adotante.usuario', alias: 'usuario' }, // Relação com usuario
   ],
 };

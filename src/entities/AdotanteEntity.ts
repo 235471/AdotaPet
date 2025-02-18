@@ -1,46 +1,27 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Unique, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { PetEntity } from './PetEntity';
 import { EnderecoEntity } from './EnderecoEntity';
+import { UsuarioEntity } from './UsuarioEntity';
 
 @Entity('adotantes')
 export class AdotanteEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  nome: string;
-
-  @Column()
-  @Unique(['email'])
-  email: string;
-
-  @Column()
-  senha: string;
-
-  @Column({ default: '' })
-  celular?: string;
-
+  @OneToOne(() => UsuarioEntity, { cascade: true, eager: true })
   @JoinColumn()
+  usuario: UsuarioEntity;
+
   @OneToOne(() => EnderecoEntity, { nullable: true, cascade: true, eager: true })
+  @JoinColumn()
   endereco?: EnderecoEntity;
 
-  // Relação de um adotante para muitos pets
   @OneToMany(() => PetEntity, (pet) => pet.adotante, { cascade: true })
   pets: PetEntity[];
 
-  constructor(
-    nome: string,
-    email: string,
-    senha: string,
-    pets: PetEntity[],
-    celular?: string,
-    endereco?: EnderecoEntity
-  ) {
-    this.nome = nome;
-    this.email = email;
-    this.senha = senha;
-    this.celular = celular;
+  constructor(usuario: UsuarioEntity, pets: PetEntity[], endereco?: EnderecoEntity) {
+    this.usuario = usuario;
     this.endereco = endereco;
     this.pets = pets;
   }

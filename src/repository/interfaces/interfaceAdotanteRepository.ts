@@ -1,14 +1,12 @@
 import { EnderecoEntity } from './../../entities/EnderecoEntity';
 import { AdotanteEntity } from '../../entities/AdotanteEntity';
 import { PetEntity } from '../../entities/PetEntity';
+import { AdotanteDTOFormatted } from '../../dto/adotante.dto';
 
 export interface InterfaceAdotanteRepository {
-  createAdotante(adotante: AdotanteEntity): void | Promise<void>;
   adotarPet(adotante: AdotanteEntity, pet: PetEntity[]): Promise<object>
-  listAdotanteSemSenha(): Promise<AdotanteEntity[]>;
-  findByEmail(email: string): Promise<AdotanteEntity>;
-  findById(id: number): Promise<AdotanteEntity>;
-  updateAdotante(id: number, adotante: Partial<AdotanteEntity>): Promise<void>;
+  listAdotanteSemSenha(): Promise<AdotanteDTOFormatted[]>;
+  findById(id: number): Promise<AdotanteDTOFormatted>;
   deleteAdotante(id: number): Promise<void>;
-  updateEndereco(id: number, endereco: EnderecoEntity): Promise<AdotanteEntity>;
+  updateEndereco(id: number, endereco: EnderecoEntity): Promise<AdotanteDTOFormatted>;
 }

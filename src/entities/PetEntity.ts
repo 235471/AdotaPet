@@ -2,6 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Especie } from '../enum/especie';
 import { AdotanteEntity } from './AdotanteEntity';
+import { Porte } from '../enum/porte';
 
 @Entity('pets')
 export class PetEntity {
@@ -17,6 +18,13 @@ export class PetEntity {
   })
   especie: Especie;
 
+  @Column({
+    type: 'text',
+    enum: Porte,
+    nullable: true,
+  })
+  porte?: Porte;
+
   @Column({ type: 'date' })
   dataNascimento: Date;
 
@@ -28,11 +36,19 @@ export class PetEntity {
   @JoinColumn({ name: 'adotanteId' }) // A chave estrangeira será 'adotanteId'
   adotante: AdotanteEntity;
 
-  constructor(nome: string, especie: Especie, dataNascimento: Date, adotado = false, adotante: AdotanteEntity) {
+  constructor(
+    nome: string,
+    especie: Especie,
+    dataNascimento: Date,
+    adotado = false,
+    adotante: AdotanteEntity,
+    porte?: Porte,
+  ) {
     this.nome = nome;
     this.especie = especie;
     this.dataNascimento = dataNascimento;
     this.adotado = adotado;
     this.adotante = adotante;
+    this.porte = porte;
   }
 }

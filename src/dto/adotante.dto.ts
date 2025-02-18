@@ -1,24 +1,19 @@
 /* eslint-disable indent */
-import { IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsObject, IsOptional, ValidateNested } from 'class-validator';
 import { EnderecoDto } from './endereco.dto';
 import { Type } from 'class-transformer';
+import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.dto';
+import { Exclude, Expose } from 'class-transformer';
+import { UsuarioDto } from './usuario.dto';
+import { EnderecoDTOFormatted } from './endereco.dto';
+import { PetEntity } from '../entities/PetEntity';
 
 export class CreateAdotanteDto {
-  @IsString()
-  @IsNotEmpty({ message: 'Nome é obrigatório' })
-  nome!: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'Email é obrigatório' })
-  email!: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'Senha é obrigatória' })
-  senha!: string;
-
-  @IsString()
-  @IsOptional()
-  celular?: string;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateUsuarioDto)
+  @IsNotEmpty({ message: 'Usuário é obrigatório' })
+  usuario!: CreateUsuarioDto;
 
   @IsObject()
   @ValidateNested()
@@ -28,24 +23,32 @@ export class CreateAdotanteDto {
 }
 
 export class UpdateAdotantetDto {
-  @IsString()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => UpdateUsuarioDto)
   @IsOptional()
-  nome?: string;
-
-  @IsString()
-  @IsOptional()
-  email?: string;
-
-  @IsString()
-  @IsOptional()
-  senha?: string;
-
-  @IsString()
-  @IsOptional()
-  celular?: string;
+  usuario?: UpdateUsuarioDto;
 
   @IsObject()
   @ValidateNested()
   @Type(() => EnderecoDto)
+  @IsOptional()
   endereco?: EnderecoDto;
+}
+
+export class AdotanteDTOFormatted {
+  @Exclude({ toPlainOnly: true })
+  id!: number;
+
+  @Expose()
+  @Type(() => UsuarioDto)
+  usuario!: UsuarioDto;
+
+  @Expose()
+  @Type(() => EnderecoDTOFormatted)
+  endereco?: EnderecoDTOFormatted;
+
+  @Expose()
+  @Type(() => PetEntity)
+  pets!: PetEntity[];
 }
