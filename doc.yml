@@ -1,0 +1,472 @@
+openapi: 3.0.0
+info:
+  title: AdotaPet API
+  version: "1.0.0"
+  description: API para gerenciamento de usuários, adotantes, pets e endereços.
+servers:
+  - url: http://localhost:3000
+paths:
+  /usuarios:
+    post:
+      summary: Cria um novo usuário
+      tags:
+        - Usuários
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUsuario'
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+    put:
+      summary: Atualiza um usuário existente
+      tags:
+        - Usuários
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário a ser atualizado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUsuario'
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+    delete:
+      summary: Exclui um usuário
+      tags:
+        - Usuários
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário a ser excluído
+      responses:
+        "204":
+          description: Usuário excluído com sucesso
+  /usuarios/login:
+    post:
+      summary: Autentica um usuário
+      tags:
+        - Usuários
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Usuário autenticado com sucesso, retornando token JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+  /adotantes:
+    get:
+      summary: Lista todos os adotantes (sem senha)
+      tags:
+        - Adotantes
+      responses:
+        "200":
+          description: Lista de adotantes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Adotante'
+    patch:
+      summary: Atualiza o endereço de um adotante
+      tags:
+        - Adotantes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do adotante cujo endereço será atualizado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Endereco'
+      responses:
+        "200":
+          description: Endereço atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Adotante'
+    delete:
+      summary: Exclui um adotante
+      tags:
+        - Adotantes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do adotante a ser excluído
+      responses:
+        "204":
+          description: Adotante excluído com sucesso
+  /adotantes/{adotanteId}/pets:
+    put:
+      summary: Adota pets para um adotante
+      tags:
+        - Adotantes
+      parameters:
+        - in: path
+          name: adotanteId
+          required: true
+          schema:
+            type: integer
+          description: ID do adotante que adotará os pets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdocaoPets'
+      responses:
+        "200":
+          description: Pets adotados com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  petsAdotados:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pet'
+        "207":
+          description: Operação parcialmente bem-sucedida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  petsAdotados:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pet'
+                  erros:
+                    type: array
+                    items:
+                      type: string
+  /pets:
+    get:
+      summary: Lista todos os pets não adotados
+      tags:
+        - Pets
+      responses:
+        "200":
+          description: Lista de pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+    post:
+      summary: Cria novos pets
+      tags:
+        - Pets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreatePet'
+      responses:
+        "201":
+          description: Pets criados com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+    put:
+      summary: Atualiza um pet existente
+      tags:
+        - Pets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do pet a ser atualizado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePet'
+      responses:
+        "200":
+          description: Pet atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Atualizado com sucesso!"
+    delete:
+      summary: Exclui um pet
+      tags:
+        - Pets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do pet a ser excluído
+      responses:
+        "204":
+          description: Pet excluído com sucesso
+  /pets/porte:
+    get:
+      summary: Lista pets filtrados por porte
+      tags:
+        - Pets
+      parameters:
+        - in: query
+          name: porte
+          required: false
+          schema:
+            type: string
+          description: Porte do pet (ex: pequeno, medio, grande)
+      responses:
+        "200":
+          description: Lista de pets filtrados por porte
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+  /pets/search:
+    get:
+      summary: Pesquisa pets por campo e valor
+      tags:
+        - Pets
+      parameters:
+        - in: query
+          name: campo
+          required: true
+          schema:
+            type: string
+          description: Campo de pesquisa (ex: nome, especie)
+        - in: query
+          name: valor
+          required: true
+          schema:
+            type: string
+          description: Valor a ser pesquisado
+      responses:
+        "200":
+          description: Lista de pets filtrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    CreateUsuario:
+      type: object
+      required:
+        - nome
+        - email
+        - senha
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+        celular:
+          type: string
+    UpdateUsuario:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+        celular:
+          type: string
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        celular:
+          type: string
+        adotante:
+          $ref: '#/components/schemas/Adotante'
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - senha
+      properties:
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+    Endereco:
+      type: object
+      required:
+        - cidade
+        - estado
+      properties:
+        cidade:
+          type: string
+        estado:
+          type: string
+    Adotante:
+      type: object
+      properties:
+        id:
+          type: integer
+        usuario:
+          $ref: '#/components/schemas/Usuario'
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+        pets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pet'
+    AdocaoPets:
+      type: object
+      required:
+        - petIds
+      properties:
+        petIds:
+          type: array
+          items:
+            type: integer
+    CreatePet:
+      type: object
+      required:
+        - nome
+        - especie
+        - dataNascimento
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+    UpdatePet:
+      type: object
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+        adotante:
+          $ref: '#/components/schemas/Adotante'
