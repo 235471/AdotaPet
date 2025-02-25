@@ -1,4 +1,4 @@
-import { PetEntity } from '../../entities/PetEntity';
+import { PetEntity } from "../../entities/PetEntity";
 
 export interface InterfacePetRepository {
   createPet(pet: PetEntity): Promise<void>;
@@ -7,11 +7,11 @@ export interface InterfacePetRepository {
   deletePet(id: number): Promise<void>;
   findPet(options: object): Promise<PetEntity | null>;
   listarPetAdocao(
-    ids: Array<number>
+    ids: Array<number>,
   ): Promise<PetEntity[] | { pets: PetEntity[]; errors: string[] }>;
-  filterByPorte(porte: PetEntity['porte']): Promise<Array<PetEntity> | Promise<PetEntity[]>>;
+  filterByPorte(porte: PetEntity["porte"]): Promise<Array<PetEntity> | Promise<PetEntity[]>>;
   filterBy<T extends keyof PetEntity>(
     field: T,
-    value: PetEntity[T]
+    value: PetEntity[T],
   ): Promise<PetEntity[] | PetEntity[]>;
 }

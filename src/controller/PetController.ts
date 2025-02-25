@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import { PetEntity } from '../entities/PetEntity';
-import { IPetController } from '../interface/PetController';
-import { PetRepository } from '../repository/PetRepository';
-import { validatePorte } from '../utils/validatePorte';
+import { Request, Response, NextFunction } from "express";
+import { PetEntity } from "../entities/PetEntity";
+import { IPetController } from "../interface/PetController";
+import { PetRepository } from "../repository/PetRepository";
+import { validatePorte } from "../utils/validatePorte";
 
 export class PetController implements IPetController {
   constructor(private repository: PetRepository) {}
@@ -28,7 +28,7 @@ export class PetController implements IPetController {
 
   async listByPorte(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const porte = req.query.porte as PetEntity['porte'];
+      const porte = req.query.porte as PetEntity["porte"];
       if (porte) {
         validatePorte(porte);
         const listPorte = await this.repository.filterByPorte(porte);
@@ -45,7 +45,7 @@ export class PetController implements IPetController {
 
       const listPet = await this.repository.filterBy(
         campo as keyof PetEntity,
-        valor as PetEntity[keyof PetEntity]
+        valor as PetEntity[keyof PetEntity],
       );
       res.status(200).json(listPet);
     } catch (err) {
@@ -58,7 +58,7 @@ export class PetController implements IPetController {
       const id: number = parseInt(req.params.id, 10);
       const updatePet: Partial<PetEntity> = req.body as Partial<PetEntity>;
       await this.repository.updatePet(id, updatePet);
-      res.status(200).json('Atualizado com sucesso!');
+      res.status(200).json("Atualizado com sucesso!");
     } catch (err: unknown) {
       next(err);
     }
@@ -68,7 +68,7 @@ export class PetController implements IPetController {
     try {
       const id: number = parseInt(req.params.id, 10);
       await this.repository.deletePet(id);
-      res.status(204).json('Excluído com sucesso!');
+      res.status(204).json("Excluído com sucesso!");
     } catch (err: unknown) {
       next(err);
     }

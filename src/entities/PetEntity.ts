@@ -1,10 +1,10 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Especie } from '../enum/especie';
-import { AdotanteEntity } from './AdotanteEntity';
-import { Porte } from '../enum/porte';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Especie } from "../enum/especie";
+import { AdotanteEntity } from "./AdotanteEntity";
+import { Porte } from "../enum/porte";
 
-@Entity('pets')
+@Entity("pets")
 export class PetEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -13,27 +13,29 @@ export class PetEntity {
   nome: string;
 
   @Column({
-    type: 'text',
+    type: "text",
     enum: Especie,
   })
   especie: Especie;
 
   @Column({
-    type: 'text',
+    type: "text",
     enum: Porte,
     nullable: true,
   })
   porte?: Porte;
 
-  @Column({ type: 'date' })
+  @Column({ type: "date" })
   dataNascimento: Date;
 
   @Column({ default: false })
   adotado: boolean;
 
   // Relação com o adotante (Muitos pets para um adotante)
-  @ManyToOne(() => AdotanteEntity, (adotante) => adotante.pets, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'adotanteId' }) // A chave estrangeira será 'adotanteId'
+  @ManyToOne(() => AdotanteEntity, (adotante) => adotante.pets, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "adotanteId" }) // A chave estrangeira será 'adotanteId'
   adotante: AdotanteEntity;
 
   constructor(

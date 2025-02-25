@@ -1,8 +1,8 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToOne } from 'typeorm';
-import { AdotanteEntity } from './AdotanteEntity';
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToOne } from "typeorm";
+import { AdotanteEntity } from "./AdotanteEntity";
 
-@Entity('usuarios')
+@Entity("usuarios")
 export class UsuarioEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -11,13 +11,13 @@ export class UsuarioEntity {
   nome: string;
 
   @Column()
-  @Unique(['email'])
+  @Unique(["email"])
   email: string;
 
   @Column()
   senha: string;
 
-  @Column({ default: '' })
+  @Column({ default: "" })
   celular?: string;
 
   @OneToOne(() => AdotanteEntity, (adotante) => adotante.usuario)

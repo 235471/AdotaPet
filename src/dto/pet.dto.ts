@@ -1,25 +1,25 @@
-import { Especie } from '../enum/especie';
+import { Especie } from "../enum/especie";
 /* eslint-disable indent */
-import { IsString, IsBoolean, IsOptional, IsEnum, IsDate, IsNotEmpty } from 'class-validator';
-import { Type } from 'class-transformer';
-import { Porte } from '../enum/porte';
+import { IsString, IsBoolean, IsOptional, IsEnum, IsDate, IsNotEmpty } from "class-validator";
+import { Type } from "class-transformer";
+import { Porte } from "../enum/porte";
 
 export class CreatePetDto {
   @IsString()
-  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  @IsNotEmpty({ message: "Nome é obrigatório" })
   nome!: string;
 
   @IsEnum(Especie)
-  @IsNotEmpty({ message: 'Espécie é obrigatória' })
-  especie!: Especie;  
-  
+  @IsNotEmpty({ message: "Espécie é obrigatória" })
+  especie!: Especie;
+
   @IsEnum(Porte)
-  @IsNotEmpty({ message: 'Espécie é obrigatória' })
+  @IsNotEmpty({ message: "Espécie é obrigatória" })
   porte!: Porte;
 
   @IsDate()
-  @IsNotEmpty({ message: 'Data de nascimento é obrigatória' })
-  @Type(() => Date) 
+  @IsNotEmpty({ message: "Data de nascimento é obrigatória" })
+  @Type(() => Date)
   dataNascimento!: Date;
 
   @IsBoolean()
@@ -41,7 +41,7 @@ export class UpdatePetDto {
 
   @IsOptional()
   @IsDate()
-  @Type(() => Date) 
+  @Type(() => Date)
   dataNascimento?: Date;
 
   @IsOptional()

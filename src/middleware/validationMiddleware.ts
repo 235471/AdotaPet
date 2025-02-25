@@ -4,6 +4,10 @@ import { validate, ValidationError } from 'class-validator';
 import { FormattedError } from '../interface/FormattedError';
 import { badRequest } from '../error/badRequest';
 
+interface PhoneValidatable {
+  validatePhone: () => void;
+}
+
 export function validateDto<T extends object>(
   dto: ClassConstructor<T>,
   isArray = false,
@@ -19,7 +23,6 @@ export function validateDto<T extends object>(
 
       // Conversão dos dados para instâncias do DTO
       const dtoInstances = convertToDto(req.body, dto, isArray);
-      
 
       // Validação dos dados
       const errors = await validateDtoInstances(dtoInstances, isArray, isUpdate);
@@ -29,12 +32,21 @@ export function validateDto<T extends object>(
         throw badRequest('Dados inválidos', errorDetails);
       }
 
+      // Se o DTO tem validação customizada do celular, chamamos ela aqui
+      if (!Array.isArray(dtoInstances) && isPhoneValidatable(dtoInstances)) {
+        dtoInstances.validatePhone();
+      }
+      
       req.body = dtoInstances;
       next();
     } catch (err) {
       next(err);
     }
   };
+}
+
+function isPhoneValidatable(obj: any): obj is PhoneValidatable {
+  return typeof obj.validatePhone === 'function';
 }
 
 // Funções auxiliares

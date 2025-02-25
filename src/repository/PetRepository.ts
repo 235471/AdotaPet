@@ -1,8 +1,8 @@
-import { Repository } from 'typeorm';
-import { PetEntity } from '../entities/PetEntity';
-import { InterfacePetRepository } from './interfaces/InterfacePetRepository';
-import { notFound } from '../error/notFound';
-import { CustomError } from '../error/customError';
+import { Repository } from "typeorm";
+import { PetEntity } from "../entities/PetEntity";
+import { InterfacePetRepository } from "./interfaces/InterfacePetRepository";
+import { notFound } from "../error/notFound";
+import { CustomError } from "../error/customError";
 
 export class PetRepository implements InterfacePetRepository {
   private repository: Repository<PetEntity>;
@@ -15,7 +15,7 @@ export class PetRepository implements InterfacePetRepository {
     try {
       await this.repository.save(pet);
     } catch (err: unknown) {
-      throw new CustomError('Erro ao criar pet', 500, err);
+      throw new CustomError("Erro ao criar pet", 500, err);
     }
   }
 
@@ -23,21 +23,21 @@ export class PetRepository implements InterfacePetRepository {
     try {
       return await this.repository.find({ where: { adotado: false } });
     } catch (err: unknown) {
-      throw new CustomError('Erro ao listar pets', 500, err);
+      throw new CustomError("Erro ao listar pets", 500, err);
     }
   }
 
-  async filterByPorte(porte: PetEntity['porte']): Promise<Array<PetEntity> | Promise<PetEntity[]>> {
+  async filterByPorte(porte: PetEntity["porte"]): Promise<Array<PetEntity> | Promise<PetEntity[]>> {
     try {
       return await this.repository.find({ where: { porte } });
     } catch (err: unknown) {
-      throw new CustomError('Erro ao lista pets por porte', 500, err);
+      throw new CustomError("Erro ao lista pets por porte", 500, err);
     }
   }
 
   async filterBy<T extends keyof PetEntity>(
     field: T,
-    value: PetEntity[T]
+    value: PetEntity[T],
   ): Promise<PetEntity[] | PetEntity[]> {
     return await this.repository.find({ where: { [field]: value } });
   }
@@ -45,15 +45,15 @@ export class PetRepository implements InterfacePetRepository {
   async updatePet(id: number, pet: Partial<PetEntity>): Promise<void> {
     try {
       const findPet: PetEntity = await this.findPetById(id);
-      if (!findPet) throw notFound('Pet não encontrado com id: ', id);
+      if (!findPet) throw notFound("Pet não encontrado com id: ", id);
       await this.repository.update(id, pet);
     } catch (err: unknown) {
-      throw new CustomError('Erro ao atualizar pet', 500, err);
+      throw new CustomError("Erro ao atualizar pet", 500, err);
     }
   }
 
   async listarPetAdocao(
-    ids: Array<number>
+    ids: Array<number>,
   ): Promise<PetEntity[] | { pets: PetEntity[]; errors: string[] }> {
     const pets: PetEntity[] = [];
     const errors: string[] = [];
@@ -64,15 +64,15 @@ export class PetRepository implements InterfacePetRepository {
           id,
           adotado: false,
         },
-        relations: ['adotante'],
+        relations: ["adotante"],
       });
       if (findPet) pets.push(findPet);
       else errors.push(`Pet com ID ${id} não encontrado`);
     }
 
     if (pets.length === 0) {
-      const id = ids.join(',');
-      throw notFound('Nenhum pet encontrado com os ids informados: ', { id });
+      const id = ids.join(",");
+      throw notFound("Nenhum pet encontrado com os ids informados: ", { id });
     } else if (errors.length > 0 && pets.length > 0) {
       return { pets, errors };
     }
@@ -83,10 +83,10 @@ export class PetRepository implements InterfacePetRepository {
   async findPetById(id: number): Promise<PetEntity> {
     try {
       const findPet = await this.repository.findOneBy({ id });
-      if (!findPet) throw notFound('Pet não encontrado', { id });
+      if (!findPet) throw notFound("Pet não encontrado", { id });
       return findPet;
     } catch (err: unknown) {
-      throw new CustomError('Erro ao buscar pet por ID', 500, err);
+      throw new CustomError("Erro ao buscar pet por ID", 500, err);
     }
   }
 
@@ -95,17 +95,17 @@ export class PetRepository implements InterfacePetRepository {
       const findPet = await this.repository.findOne(options);
       return findPet;
     } catch (err: unknown) {
-      throw new CustomError('Erro ao buscar pet', 500, err);
+      throw new CustomError("Erro ao buscar pet", 500, err);
     }
   }
 
   async deletePet(id: number): Promise<void> {
     try {
       const findPet: PetEntity = await this.findPetById(id);
-      if (!findPet) throw notFound('Pet não encontrado com id: ', id);
+      if (!findPet) throw notFound("Pet não encontrado com id: ", id);
       await this.repository.delete(id);
     } catch (err: unknown) {
-      throw new CustomError('Erro ao deletar pet', 500, err);
+      throw new CustomError("Erro ao deletar pet", 500, err);
     }
   }
 }

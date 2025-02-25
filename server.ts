@@ -1,5 +1,5 @@
-import 'reflect-metadata';
-import app from './src/app.js';
+import "reflect-metadata";
+import app from "./src/app.js";
 
 const PORTA = Number(process.env.PORT) | 3000;
 

@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { PetEntity } from '../entities/PetEntity';
+import { Request, Response, NextFunction } from "express";
+import { PetEntity } from "../entities/PetEntity";
 
 export interface IPetController {
   createPets(req: Request<unknown, unknown, PetEntity[]>, res: Response, next: NextFunction): void;

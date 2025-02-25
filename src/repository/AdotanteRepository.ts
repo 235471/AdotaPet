@@ -10,6 +10,8 @@ import { CustomError } from '../error/customError';
 import { plainToInstance } from 'class-transformer';
 import { EnderecoDto, EnderecoDTOFormatted } from '../dto/endereco.dto';
 import { AdotanteDTOFormatted } from '../dto/adotante.dto';
+import { internalServerError } from '../error/internalServerError';
+import { TipoResponseBodyAdotantes, TipoResponseBodyEndereco } from '../types/tipoAdotante';
 
 export class AdotanteRepository implements InterfaceAdotanteRepository {
   private repository: Repository<AdotanteEntity>;
@@ -18,7 +20,7 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
     this.repository = repository;
   }
 
-  async listAdotanteSemSenha(): Promise<AdotanteDTOFormatted[]> {
+  async listAdotanteSemSenha(): Promise<TipoResponseBodyAdotantes> {
     const queryBuilder = createAdotanteQueryBuilder(
       this.repository,
       AdotanteFields.selectFields,
@@ -27,18 +29,33 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
 
     try {
       const result = await queryBuilder.getMany();
-      return result.map((adotante) => {
-        if (adotante.endereco) {
-          adotante.endereco = plainToInstance(EnderecoDTOFormatted, adotante.endereco, {
-            excludeExtraneousValues: true,
-          });
-        }
-        return plainToInstance(AdotanteDTOFormatted, adotante, {
-          excludeExtraneousValues: true,
-        });
-      });
+
+      const responseData = {
+        data: result.map((adotante) => ({
+          usuario: {
+            nome: adotante.usuario.nome,
+            email: adotante.usuario.email,
+            celular: adotante.usuario.celular,
+          },
+          endereco: adotante.endereco
+            ? {
+                cidade: adotante.endereco.cidade,
+                estado: adotante.endereco.estado,
+              }
+            : undefined,
+          pets: adotante.pets.map((pet) => ({
+            nome: pet.nome,
+            especie: pet.especie,
+            adotado: pet.adotado,
+            dataNascimento: pet.dataNascimento,
+            porte: pet.porte,
+          })),
+        })),
+      };
+
+      return responseData;
     } catch (err) {
-      throw new CustomError('Erro ao listar adotantes', 500, err);
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 
@@ -72,7 +89,10 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
 
       await this.repository.delete(id);
     } catch (err) {
-      throw new CustomError('Erro ao deletar adotante', 500, err);
+      if (err instanceof CustomError) {
+        throw err;
+      }
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 
@@ -97,7 +117,7 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
     }
   }
 
-  async updateEndereco(id: number, endereco: EnderecoDto): Promise<AdotanteDTOFormatted> {
+  async updateEndereco(id: number, endereco: EnderecoDto): Promise<TipoResponseBodyEndereco> {
     try {
       const queryBuilder = createAdotanteQueryBuilder(
         this.repository,
@@ -120,11 +140,26 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
 
       await this.repository.save(adotante);
 
-      return plainToInstance(AdotanteDTOFormatted, adotante, {
-        excludeExtraneousValues: true,
-      });
+      const result = {
+        data: {
+          usuario: {
+            nome: adotante.usuario.nome,
+            email: adotante.usuario.email,
+            celular: adotante.usuario.celular,
+          },
+          endereco: {
+            cidade: adotante.endereco.cidade,
+            estado: adotante.endereco.estado,
+          },
+        },
+      };
+
+      return result;
     } catch (err) {
-      throw new CustomError('Erro ao atualizar endereço', 500, err);
+      if (err instanceof CustomError) {
+        throw err;
+      }
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 }

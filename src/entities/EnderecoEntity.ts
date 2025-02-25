@@ -1,7 +1,7 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, Column, } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity('enderecos')
+@Entity("enderecos")
 export class EnderecoEntity {
   @PrimaryGeneratedColumn()
   id!: number;

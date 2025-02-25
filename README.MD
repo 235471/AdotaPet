@@ -101,7 +101,7 @@ Esta documentação inclui todos os endpoints, parâmetros e modelos utilizados 
 Para permitir que o token JWT seja propagado em todas as requisições, o objeto `Request` do Express foi estendido com tipagens personalizadas. Veja o exemplo abaixo:
 
 ```typescript
-import { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from "jsonwebtoken";
 
 declare global {
   namespace Express {

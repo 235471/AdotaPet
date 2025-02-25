@@ -6,6 +6,13 @@ import { PetRepository } from '../repository/PetRepository';
 import { adocaoPetsDto } from '../dto/adocaoPets.dto';
 import { EnderecoDto } from '../dto/endereco.dto';
 import { AdotanteDTOFormatted } from '../dto/adotante.dto';
+import {
+  TipoRequestBodyEndereco,
+  TipoRequestQueryAdotantes,
+  TipoResponseBodyAdotantes,
+  TipoResponseBodyEndereco,
+  TipoResponseParamsEndereco,
+} from '../types/tipoAdotante';
 
 export class AdotanteController {
   constructor(
@@ -13,9 +20,14 @@ export class AdotanteController {
     private petRepository: PetRepository
   ) {}
 
-  async listAdotante(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async listAdotante(
+    req: Request<unknown, unknown, unknown, TipoRequestQueryAdotantes>,
+    res: Response<TipoResponseBodyAdotantes>,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const listAdotante = await this.repository.listAdotanteSemSenha();
+
       res.status(200).json(listAdotante);
     } catch (err) {
       next(err);
@@ -45,7 +57,10 @@ export class AdotanteController {
           erros: errors,
         });
       } else {
-        res.status(200).json({ message: 'Pets adotados com sucesso!', petsAdotados: petsAdotados });
+        res.status(200).json({
+          message: 'Pets adotados com sucesso!',
+          petsAdotados: petsAdotados,
+        });
       }
     } catch (err) {
       console.error('Erro ao adotar pet', err);
@@ -53,7 +68,11 @@ export class AdotanteController {
     }
   }
 
-  async deleteAdotante(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteAdotante(
+    req: Request<TipoResponseParamsEndereco, unknown, unknown>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const id: number = parseInt(req.params.id, 10);
       await this.repository.deleteAdotante(id);
@@ -63,12 +82,16 @@ export class AdotanteController {
     }
   }
 
-  async updateEndereco(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateEndereco(
+    req: Request<TipoResponseParamsEndereco, unknown, TipoRequestBodyEndereco>,
+    res: Response<TipoResponseBodyEndereco>,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const id: number = parseInt(req.params.id, 10);
-      const endereco: EnderecoDto = req.body as EnderecoDto;
+      const endereco: EnderecoDto = req.body;
       const adotanteUpdated = await this.repository.updateEndereco(id, endereco);
-      res.status(200).json(adotanteUpdated);
+      res.status(200).json({});
     } catch (err) {
       next(err);
     }

@@ -8,11 +8,14 @@ export class CustomError extends Error {
     this.details = details;
     this.name = this.constructor.name;
 
-    // Object.setPrototypeOf(this, new.target.prototype);
-
     // Ensures the stack trace is properly captured in V8 engines
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
+    }
+
+    // Se o "details" for um erro, preserva a stack trace original do erro.
+    if (details instanceof Error) {
+      this.stack = details.stack;
     }
   }
 }

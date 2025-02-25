@@ -1,14 +1,14 @@
 /* eslint-disable indent */
-import { Exclude, Expose } from 'class-transformer';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { Exclude, Expose } from "class-transformer";
+import { IsString, IsNotEmpty } from "class-validator";
 
 export class EnderecoDto {
   @IsString()
-  @IsNotEmpty({ message: 'Cidade é obrigatória' })
+  @IsNotEmpty({ message: "Cidade é obrigatória" })
   cidade!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Estado é obrigatório' })
+  @IsNotEmpty({ message: "Estado é obrigatório" })
   estado!: string;
 }
 

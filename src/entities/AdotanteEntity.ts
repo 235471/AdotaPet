@@ -1,10 +1,10 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
-import { PetEntity } from './PetEntity';
-import { EnderecoEntity } from './EnderecoEntity';
-import { UsuarioEntity } from './UsuarioEntity';
+import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from "typeorm";
+import { PetEntity } from "./PetEntity";
+import { EnderecoEntity } from "./EnderecoEntity";
+import { UsuarioEntity } from "./UsuarioEntity";
 
-@Entity('adotantes')
+@Entity("adotantes")
 export class AdotanteEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -13,7 +13,11 @@ export class AdotanteEntity {
   @JoinColumn()
   usuario: UsuarioEntity;
 
-  @OneToOne(() => EnderecoEntity, { nullable: true, cascade: true, eager: true })
+  @OneToOne(() => EnderecoEntity, {
+    nullable: true,
+    cascade: true,
+    eager: true,
+  })
   @JoinColumn()
   endereco?: EnderecoEntity;
 

@@ -1,6 +1,8 @@
 /* eslint-disable indent */
 import { Exclude, Expose } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { badRequest } from '../error/badRequest';
 
 export class UsuarioDto {
   @Expose()
@@ -36,6 +38,7 @@ export class CreateUsuarioDto {
 
   @IsString()
   @IsNotEmpty({ message: 'Email é obrigatório' })
+  @IsEmail({}, { message: 'Email inválido' })
   email!: string;
 
   @IsString()
@@ -45,6 +48,16 @@ export class CreateUsuarioDto {
   @IsString()
   @IsOptional()
   celular?: string;
+
+  // Validação do celular
+  validatePhone() {
+    if (this.celular) {
+      const phoneNumber = parsePhoneNumberFromString(this.celular, 'BR');
+      if (!phoneNumber || !phoneNumber.isValid()) {
+        throw badRequest('Celular inválido. Verifique o formato e os números.');
+      }
+    }
+  }
 }
 
 export class UpdateUsuarioDto {
@@ -63,4 +76,14 @@ export class UpdateUsuarioDto {
   @IsString()
   @IsOptional()
   celular?: string;
+
+  // Validação do celular
+  validatePhone() {
+    if (this.celular) {
+      const phoneNumber = parsePhoneNumberFromString(this.celular, 'BR');
+      if (!phoneNumber || !phoneNumber.isValid()) {
+        throw new Error('Celular inválido. Verifique o formato e os números.');
+      }
+    }
+  }
 }

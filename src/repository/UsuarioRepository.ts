@@ -1,3 +1,4 @@
+import { validate } from 'class-validator';
 import { Repository } from 'typeorm';
 import { UsuarioEntity } from '../entities/UsuarioEntity';
 import { AdotanteEntity } from '../entities/AdotanteEntity';
@@ -9,67 +10,108 @@ import { notFound } from '../error/notFound';
 import { criarHashSenha } from '../utils/passwordHash';
 import jwt from 'jsonwebtoken';
 import { CustomError } from '../error/customError';
+import { TipoReponseBodyUsuario, TipoRequestBodyUsuario } from '../types/tiposUsuario';
+import { conflict } from '../error/conflict';
+import { internalServerError } from '../error/internalServerError';
 
 export class UsuarioRepository implements InterfaceUsuarioRepository {
   private repository: Repository<UsuarioEntity>;
   private adotanteRepository: Repository<AdotanteEntity>;
 
-  constructor(repository: Repository<UsuarioEntity>, adotanteRepository: Repository<AdotanteEntity>) {
+  constructor(
+    repository: Repository<UsuarioEntity>,
+    adotanteRepository: Repository<AdotanteEntity>
+  ) {
     this.repository = repository;
     this.adotanteRepository = adotanteRepository;
   }
 
-  async findByEmail(email: string): Promise<UsuarioEntity | null> {
+  async findByFields(filters: Record<string, any>): Promise<UsuarioEntity | null> {
     const alias: string = process.env.USUARIO_ALIAS || 'usuario';
-    return await this.repository
-      .createQueryBuilder(alias)
-      .where(`${alias}.email = :email`, { email })
-      .getOne();
+
+    let where: string = '';
+    const parameters: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(filters)) {
+      // Adiciona a condição WHERE
+      where += where ? ` AND ${alias}.${key} = :${key}` : `${alias}.${key} = :${key}`;
+      parameters[key] = value;
+    }
+
+    return await this.repository.createQueryBuilder(alias).where(where, parameters).getOne();
   }
 
-  async createUsuario(usuario: UsuarioEntity): Promise<void> {
-    const hash = await criarHashSenha(usuario.senha);
-    usuario.senha = hash;
+  async createUsuario(usuario: TipoRequestBodyUsuario): Promise<TipoReponseBodyUsuario> {
     try {
-      await this.repository.save(usuario);
+      const userExist = await this.findByFields({ email: usuario.email });
+
+      if (userExist) throw conflict('E-mail já cadastrado');
+
+      if (usuario.celular) {
+        const userExistCelular = await this.findByFields({ celular: usuario.celular });
+        if (userExistCelular) throw conflict('Celular já cadastrado');
+      }
+
+      const newUser = new UsuarioEntity(
+        usuario.email,
+        usuario.nome,
+        await criarHashSenha(usuario.senha)
+      );
+
+      const savedUser = await this.repository.save(newUser);
 
       // Criar adotante correspondente
-      const adotante = new AdotanteEntity(usuario, []);
+      const adotante = new AdotanteEntity(savedUser, []);
       await this.adotanteRepository.save(adotante);
+      return { data: { id: newUser.id, nome: newUser.nome, celular: newUser.celular } };
     } catch (err) {
-      throw new CustomError('Erro ao criar usuário', 500, err);
+      if (err instanceof CustomError) {
+        throw err;
+      }
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 
-  async updateUsuario(id: number, usuario: Partial<UsuarioEntity>): Promise<void> {
+  async updateUsuario(
+    id: number,
+    usuario: Partial<UsuarioEntity>
+  ): Promise<TipoReponseBodyUsuario> {
     try {
-      const queryBuilder = this.repository.createQueryBuilder('usuario');
-      queryBuilder.where('usuario.id = :id', { id });
+      const isUsuario = await this.findByFields({ id });
 
-      const isUsuario = await queryBuilder.getOne();
       if (!isUsuario) throw notFound('Usuário não encontrado com o id: ', { id });
 
       if (usuario.senha) {
         usuario.senha = await criarHashSenha(usuario.senha);
       }
 
-      await this.repository.update(id, usuario);
+      const updateUser = { ...isUsuario, ...usuario };
+
+      await this.repository.update(id, updateUser);
+
+      return {
+        data: { id: updateUser.id, nome: updateUser.nome, celular: updateUser.celular },
+      };
     } catch (err) {
-      throw new CustomError('Erro ao atualizar usuário', 500, err);
+      if (err instanceof CustomError) {
+        throw err;
+      }
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 
   async deleteUsuario(id: number): Promise<void> {
     try {
-      const queryBuilder = this.repository.createQueryBuilder('usuario');
-      queryBuilder.where('usuario.id = :id', { id });
+      const isUsuario = await this.findByFields({ id });
 
-      const isUsuario = await queryBuilder.getOne();
       if (!isUsuario) throw notFound('Usuário não encontrado com o id: ', { id });
 
       await this.repository.delete(id);
     } catch (err) {
-      throw new CustomError('Erro ao deletar usuário', 500, err);
+      if (err instanceof CustomError) {
+        throw err;
+      }
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 
@@ -77,8 +119,8 @@ export class UsuarioRepository implements InterfaceUsuarioRepository {
     if (!email || !senha) throw badRequest('Email e senha são obrigatórios.');
     // eslint-disable-next-line no-useless-catch
     try {
-      const usuario: UsuarioEntity | null = await this.findByEmail(email);
-      if (!usuario) throw notFound('Usuário não encontrado');
+      const usuario: UsuarioEntity | null = await this.findByFields({ email });
+      if (!usuario) throw notFound('Usuário ou Senha incorreta.');
 
       const senhaValida = await verificarSenha(senha, usuario.senha);
       if (!senhaValida) {
@@ -95,7 +137,10 @@ export class UsuarioRepository implements InterfaceUsuarioRepository {
 
       return { accessToken };
     } catch (err) {
-      throw err;
+      if (err instanceof CustomError) {
+        throw err;
+      }
+      throw internalServerError('Erro ao criar usuário', err);
     }
   }
 }

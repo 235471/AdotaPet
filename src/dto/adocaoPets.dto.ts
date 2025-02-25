@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { IsArray, IsInt, ArrayNotEmpty } from 'class-validator';
+import { IsArray, IsInt, ArrayNotEmpty } from "class-validator";
 
 export class adocaoPetsDto {
   @IsArray()

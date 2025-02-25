@@ -2,38 +2,54 @@ import { NextFunction, Request, Response } from 'express';
 import { UsuarioRepository } from '../repository/UsuarioRepository';
 import { UsuarioEntity } from '../entities/UsuarioEntity';
 import { LoginRequestBody } from '../interface/LoginRequestBody';
+import {
+  TipoReponseBodyUsuario,
+  TipoReponseParamsUsuario,
+  TipoRequestBodyUsuario,
+} from '../types/tiposUsuario';
 
 export class UsuarioController {
   constructor(private repository: UsuarioRepository) {}
 
   async createUsuario(
-    req: Request<unknown, unknown, UsuarioEntity>,
-    res: Response,
+    req: Request<unknown, unknown, TipoRequestBodyUsuario>,
+    res: Response<TipoReponseBodyUsuario>,
     next: NextFunction
   ): Promise<void> {
     try {
       const usuario = req.body;
-      await this.repository.createUsuario(usuario);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { senha, ...usuarioSemSenha } = usuario;
-      res.status(201).json(usuarioSemSenha);
+      const newUser = await this.repository.createUsuario(usuario);
+      res
+        .status(201)
+        .json(newUser);
     } catch (err: unknown) {
       next(err);
     }
   }
 
-  async updateUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateUsuario(
+    req: Request<TipoReponseParamsUsuario, unknown, TipoRequestBodyUsuario>,
+    res: Response<TipoReponseBodyUsuario>,
+    next: NextFunction
+  ): Promise<void> {
     try {
+
       const id: number = parseInt(req.params.id, 10);
-      const updateUsuario: Partial<UsuarioEntity> = req.body as Partial<UsuarioEntity>;
-      await this.repository.updateUsuario(id, updateUsuario);
-      res.status(200).json(updateUsuario);
+      const user: Partial<UsuarioEntity> = req.body as Partial<UsuarioEntity>;
+      const updatedUser = await this.repository.updateUsuario(id, user);
+      res
+        .status(200)
+        .json();
     } catch (err) {
       next(err);
     }
   }
 
-  async deleteUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteUsuario(
+    req: Request<TipoReponseParamsUsuario, unknown, TipoRequestBodyUsuario>,
+    res: Response<TipoReponseBodyUsuario>,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const id: number = parseInt(req.params.id, 10);
       await this.repository.deleteUsuario(id);
