@@ -1,18 +1,18 @@
 /* eslint-disable indent */
-import { Exclude, Expose } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { badRequest } from '../error/badRequest';
+import { Exclude, Expose } from "class-transformer";
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { badRequest } from "../error/badRequest";
 
 export class UsuarioDto {
   @Expose()
   @IsString()
-  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  @IsNotEmpty({ message: "Nome é obrigatório" })
   nome!: string;
 
   @Expose()
   @IsString()
-  @IsNotEmpty({ message: 'Email é obrigatório' })
+  @IsNotEmpty({ message: "Email é obrigatório" })
   email!: string;
 
   @Expose()
@@ -22,7 +22,7 @@ export class UsuarioDto {
 
   @Exclude({ toPlainOnly: true })
   @IsString()
-  @IsNotEmpty({ message: 'Senha é obrigatória' })
+  @IsNotEmpty({ message: "Senha é obrigatória" })
   senha!: string;
 
   @Expose()
@@ -33,16 +33,16 @@ export class UsuarioDto {
 
 export class CreateUsuarioDto {
   @IsString()
-  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  @IsNotEmpty({ message: "Nome é obrigatório" })
   nome!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Email é obrigatório' })
-  @IsEmail({}, { message: 'Email inválido' })
+  @IsNotEmpty({ message: "Email é obrigatório" })
+  @IsEmail({}, { message: "Email inválido" })
   email!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Senha é obrigatória' })
+  @IsNotEmpty({ message: "Senha é obrigatória" })
   senha!: string;
 
   @IsString()
@@ -52,9 +52,9 @@ export class CreateUsuarioDto {
   // Validação do celular
   validatePhone() {
     if (this.celular) {
-      const phoneNumber = parsePhoneNumberFromString(this.celular, 'BR');
+      const phoneNumber = parsePhoneNumberFromString(this.celular, "BR");
       if (!phoneNumber || !phoneNumber.isValid()) {
-        throw badRequest('Celular inválido. Verifique o formato e os números.');
+        throw badRequest("Celular inválido. Verifique o formato e os números.");
       }
     }
   }
@@ -80,9 +80,9 @@ export class UpdateUsuarioDto {
   // Validação do celular
   validatePhone() {
     if (this.celular) {
-      const phoneNumber = parsePhoneNumberFromString(this.celular, 'BR');
+      const phoneNumber = parsePhoneNumberFromString(this.celular, "BR");
       if (!phoneNumber || !phoneNumber.isValid()) {
-        throw new Error('Celular inválido. Verifique o formato e os números.');
+        throw new Error("Celular inválido. Verifique o formato e os números.");
       }
     }
   }

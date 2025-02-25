@@ -19,9 +19,7 @@ export class UsuarioController {
     try {
       const usuario = req.body;
       const newUser = await this.repository.createUsuario(usuario);
-      res
-        .status(201)
-        .json(newUser);
+      res.status(201).json(newUser);
     } catch (err: unknown) {
       next(err);
     }
@@ -33,13 +31,10 @@ export class UsuarioController {
     next: NextFunction
   ): Promise<void> {
     try {
-
       const id: number = parseInt(req.params.id, 10);
       const user: Partial<UsuarioEntity> = req.body as Partial<UsuarioEntity>;
       const updatedUser = await this.repository.updateUsuario(id, user);
-      res
-        .status(200)
-        .json();
+      res.status(200).json(updatedUser);
     } catch (err) {
       next(err);
     }

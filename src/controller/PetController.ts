@@ -1,23 +1,41 @@
-import { Request, Response, NextFunction } from "express";
-import { PetEntity } from "../entities/PetEntity";
-import { IPetController } from "../interface/PetController";
-import { PetRepository } from "../repository/PetRepository";
-import { validatePorte } from "../utils/validatePorte";
+import { Request, Response, NextFunction } from 'express';
+import { PetEntity } from '../entities/PetEntity';
+import { IPetController } from '../interface/PetController';
+import { PetRepository } from '../repository/PetRepository';
+import { validatePorte } from '../utils/validatePorte';
+import {
+  TipoRequestBodyPetArray,
+  TipoRequestParamsPet,
+  TipoRequestQueryPets,
+  TipoResponseBodyPet,
+} from '../types/tiposPets';
+import { badRequest } from '../error/badRequest';
 
 export class PetController implements IPetController {
-  constructor(private repository: PetRepository) {}
+  constructor(private repository: PetRepository) { }
 
-  createPets(req: Request<unknown, unknown, PetEntity[]>, res: Response, next: NextFunction): void {
+  async createPets(
+    req: Request<TipoRequestParamsPet, {}, TipoRequestBodyPetArray>,
+    res: Response<TipoResponseBodyPet[]>,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const pets = req.body;
-      pets.forEach(async (pet) => await this.repository.createPet(pet));
-      res.status(201).json(pets);
+
+      const promises = pets.map((pet) => this.repository.createPet(pet));
+
+      const response = await Promise.all(promises);
+      res.status(201).json(response);
     } catch (err: unknown) {
       next(err);
     }
   }
 
-  async listAll(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async listAll(
+    req: Request<TipoRequestParamsPet, {}, TipoRequestBodyPetArray>,
+    res: Response<TipoResponseBodyPet[]>,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const listPets = await this.repository.listPet();
       res.status(200).json(listPets);
@@ -28,7 +46,7 @@ export class PetController implements IPetController {
 
   async listByPorte(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const porte = req.query.porte as PetEntity["porte"];
+      const porte = req.query.porte as PetEntity['porte'];
       if (porte) {
         validatePorte(porte);
         const listPorte = await this.repository.filterByPorte(porte);
@@ -39,36 +57,51 @@ export class PetController implements IPetController {
     }
   }
 
-  async listBy(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async listBy(
+    req: Request<TipoRequestParamsPet, {}, TipoRequestBodyPetArray, TipoRequestQueryPets>,
+    res: Response<TipoResponseBodyPet>,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const { campo, valor } = req.query;
-
-      const listPet = await this.repository.filterBy(
-        campo as keyof PetEntity,
-        valor as PetEntity[keyof PetEntity],
-      );
+      const queryObject  = req.query;
+      
+      const listPet = await this.repository.filterBy(queryObject);
       res.status(200).json(listPet);
     } catch (err) {
       next(err);
     }
   }
 
-  async updatePet(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updatePet(
+    req: Request<TipoRequestParamsPet, {}, TipoRequestBodyPetArray>,
+    res: Response<TipoResponseBodyPet>,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const id: number = parseInt(req.params.id, 10);
+      const { id } = req.params;
+      if (!id) {
+        throw badRequest('ID parameter is missing');
+      }
       const updatePet: Partial<PetEntity> = req.body as Partial<PetEntity>;
-      await this.repository.updatePet(id, updatePet);
-      res.status(200).json("Atualizado com sucesso!");
+      await this.repository.updatePet(parseInt(id, 10), updatePet);
+      res.status(204)
     } catch (err: unknown) {
       next(err);
     }
   }
 
-  async deletePet(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deletePet(
+    req: Request<TipoRequestParamsPet, {}, TipoRequestBodyPetArray>,
+    res: Response<TipoResponseBodyPet>,
+    next: NextFunction
+  ): Promise<void> {
     try {
-      const id: number = parseInt(req.params.id, 10);
-      await this.repository.deletePet(id);
-      res.status(204).json("Excluído com sucesso!");
+      const { id } = req.params;
+      if (!id) {
+        throw badRequest('ID parameter is missing');
+      }
+      await this.repository.deletePet(parseInt(id,10));
+      res.status(204);
     } catch (err: unknown) {
       next(err);
     }

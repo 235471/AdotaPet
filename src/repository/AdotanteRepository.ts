@@ -8,10 +8,11 @@ import { AdotanteFields } from '../constants/adotante.selectFields';
 import { createAdotanteQueryBuilder } from '../utils/queryBuilder';
 import { CustomError } from '../error/customError';
 import { plainToInstance } from 'class-transformer';
-import { EnderecoDto, EnderecoDTOFormatted } from '../dto/endereco.dto';
+import { EnderecoDto } from '../dto/endereco.dto';
 import { AdotanteDTOFormatted } from '../dto/adotante.dto';
 import { internalServerError } from '../error/internalServerError';
 import { TipoResponseBodyAdotantes, TipoResponseBodyEndereco } from '../types/tipoAdotante';
+import { TipoResponseBodyPetAdotado } from '../types/tiposPets';
 
 export class AdotanteRepository implements InterfaceAdotanteRepository {
   private repository: Repository<AdotanteEntity>;
@@ -29,7 +30,7 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
 
     try {
       const result = await queryBuilder.getMany();
-
+ 
       const responseData = {
         data: result.map((adotante) => ({
           usuario: {
@@ -96,8 +97,12 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
     }
   }
 
-  async adotarPet(adotante: AdotanteEntity, pets: PetEntity[]): Promise<Partial<PetEntity>[]> {
+  async adotarPet(
+    adotante: AdotanteEntity,
+    pets: PetEntity[]
+  ): Promise<TipoResponseBodyPetAdotado> {
     try {
+
       for (const pet of pets) {
         pet.adotado = true;
         pet.adotante = adotante;
@@ -105,13 +110,16 @@ export class AdotanteRepository implements InterfaceAdotanteRepository {
       }
 
       // Retorna apenas os campos necessários dos pets adotados
-      return pets.map((pet) => ({
-        id: pet.id,
-        nome: pet.nome,
-        especie: pet.especie,
-        dataNascimento: pet.dataNascimento,
-        adotado: pet.adotado,
+      const result = pets.map((pet) => ({
+        id: pet.id!,
+        nome: pet.nome!,
+        porte: pet.porte!,
+        especie: pet.especie!,
+        dataNascimento: pet.dataNascimento!,
+        adotado: pet.adotado!,
       }));
+
+      return result;
     } catch (err) {
       throw new CustomError('Erro ao adotar pet', 500, err);
     }

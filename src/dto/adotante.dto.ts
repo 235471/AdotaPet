@@ -1,18 +1,18 @@
 /* eslint-disable indent */
-import { IsNotEmpty, IsObject, IsOptional, ValidateNested } from "class-validator";
-import { EnderecoDto } from "./endereco.dto";
-import { Type } from "class-transformer";
-import { CreateUsuarioDto, UpdateUsuarioDto } from "./usuario.dto";
-import { Exclude, Expose } from "class-transformer";
-import { UsuarioDto } from "./usuario.dto";
-import { EnderecoDTOFormatted } from "./endereco.dto";
-import { PetEntity } from "../entities/PetEntity";
+import { IsNotEmpty, IsObject, IsOptional, ValidateNested } from 'class-validator';
+import { EnderecoDto } from './endereco.dto';
+import { Type } from 'class-transformer';
+import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.dto';
+import { Exclude, Expose } from 'class-transformer';
+import { UsuarioDto } from './usuario.dto';
+import { EnderecoDTOFormatted } from './endereco.dto';
+import { PetEntity } from '../entities/PetEntity';
 
 export class CreateAdotanteDto {
   @IsObject()
   @ValidateNested()
   @Type(() => CreateUsuarioDto)
-  @IsNotEmpty({ message: "Usuário é obrigatório" })
+  @IsNotEmpty({ message: 'Usuário é obrigatório' })
   usuario!: CreateUsuarioDto;
 
   @IsObject()
@@ -37,7 +37,7 @@ export class UpdateAdotantetDto {
 }
 
 export class AdotanteDTOFormatted {
-  @Exclude({ toPlainOnly: true })
+  @Expose()
   id!: number;
 
   @Expose()

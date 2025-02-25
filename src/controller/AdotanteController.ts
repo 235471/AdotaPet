@@ -8,8 +8,10 @@ import { EnderecoDto } from '../dto/endereco.dto';
 import { AdotanteDTOFormatted } from '../dto/adotante.dto';
 import {
   TipoRequestBodyEndereco,
-  TipoRequestQueryAdotantes,
+  TipoRequestParamsAdotante,
+  TipoResponseBodyAdotante,
   TipoResponseBodyAdotantes,
+  TipoResponseBodyAdotaPet,
   TipoResponseBodyEndereco,
   TipoResponseParamsEndereco,
 } from '../types/tipoAdotante';
@@ -21,7 +23,7 @@ export class AdotanteController {
   ) {}
 
   async listAdotante(
-    req: Request<unknown, unknown, unknown, TipoRequestQueryAdotantes>,
+    req: Request<unknown, unknown, unknown>,
     res: Response<TipoResponseBodyAdotantes>,
     next: NextFunction
   ): Promise<void> {
@@ -34,32 +36,41 @@ export class AdotanteController {
     }
   }
 
-  async adotaPet(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async adotaPet(
+    req: Request<TipoRequestParamsAdotante, unknown, TipoResponseBodyAdotante>,
+    res: Response<TipoResponseBodyAdotaPet>,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const adotanteId: number = parseInt(req.params.adotanteId, 10);
-      const { petIds }: adocaoPetsDto = req.body as adocaoPetsDto;
+      const { petIds }: adocaoPetsDto = req.body;
 
       const adotante: AdotanteDTOFormatted = await this.repository.findById(adotanteId);
       const result = await this.petRepository.listarPetAdocao(petIds);
 
       const pets: PetEntity[] = Array.isArray(result) ? result : result.pets;
       const errors: string[] = Array.isArray(result) ? [] : result.errors;
-      const petsAdotados = await this.repository.adotarPet(
-        adotante as unknown as AdotanteEntity,
-        pets
-      );
+      const petsAdotados = await this.repository.adotarPet(adotante as AdotanteEntity, pets);
 
       if (errors.length > 0) {
         res.status(207).json({
-          message:
-            'Operação parcialmente bem-sucedida: alguns pets foram adotados, outros não encontrados.',
-          petsAdotados: petsAdotados,
-          erros: errors,
+          data: [
+            {
+              message:
+                'Operação parcialmente bem-sucedida: alguns pets foram adotados, outros não encontrados.',
+              pets: petsAdotados,
+              errors: errors,
+            },
+          ],
         });
       } else {
         res.status(200).json({
-          message: 'Pets adotados com sucesso!',
-          petsAdotados: petsAdotados,
+          data: [
+            {
+              message: 'Pets adotados com sucesso!',
+              pets: petsAdotados,
+            },
+          ],
         });
       }
     } catch (err) {
@@ -91,7 +102,7 @@ export class AdotanteController {
       const id: number = parseInt(req.params.id, 10);
       const endereco: EnderecoDto = req.body;
       const adotanteUpdated = await this.repository.updateEndereco(id, endereco);
-      res.status(200).json({});
+      res.status(200).json(adotanteUpdated);
     } catch (err) {
       next(err);
     }

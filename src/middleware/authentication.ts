@@ -3,7 +3,6 @@ import { verify, decode, JwtPayload } from "jsonwebtoken";
 import { unauthorized } from "../error/unauthorized";
 
 export function authentication(req: Request, res: Response, next: NextFunction) {
-  
   const token: string | undefined = req.headers.authorization;
 
   if (!token) {

@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
-import { validate, ValidationError } from 'class-validator';
-import { FormattedError } from '../interface/FormattedError';
-import { badRequest } from '../error/badRequest';
+import { Request, Response, NextFunction } from "express";
+import { ClassConstructor, plainToInstance } from "class-transformer";
+import { validate, ValidationError } from "class-validator";
+import { FormattedError } from "../interface/FormattedError";
+import { badRequest } from "../error/badRequest";
 
 interface PhoneValidatable {
   validatePhone: () => void;
@@ -11,13 +11,13 @@ interface PhoneValidatable {
 export function validateDto<T extends object>(
   dto: ClassConstructor<T>,
   isArray = false,
-  isUpdate = false
+  isUpdate = false,
 ) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Validação do formato do body
       if (!isValidBodyFormat(req.body, isArray)) {
-        const expectedFormat = isArray ? 'array' : 'objeto';
+        const expectedFormat = isArray ? "array" : "objeto";
         throw badRequest(`O corpo da requisição deve ser um ${expectedFormat}`);
       }
 
@@ -29,14 +29,14 @@ export function validateDto<T extends object>(
 
       if (errors.length > 0) {
         const errorDetails = formatErrors(errors);
-        throw badRequest('Dados inválidos', errorDetails);
+        throw badRequest("Dados inválidos", errorDetails);
       }
 
       // Se o DTO tem validação customizada do celular, chamamos ela aqui
       if (!Array.isArray(dtoInstances) && isPhoneValidatable(dtoInstances)) {
         dtoInstances.validatePhone();
       }
-      
+
       req.body = dtoInstances;
       next();
     } catch (err) {
@@ -46,7 +46,7 @@ export function validateDto<T extends object>(
 }
 
 function isPhoneValidatable(obj: any): obj is PhoneValidatable {
-  return typeof obj.validatePhone === 'function';
+  return typeof obj.validatePhone === "function";
 }
 
 // Funções auxiliares
@@ -63,7 +63,7 @@ function convertToDto<T>(body: unknown, dto: ClassConstructor<T>, isArray: boole
 async function validateDtoInstances<T extends object>(
   instances: T | T[],
   isArray: boolean,
-  isUpdate: boolean
+  isUpdate: boolean,
 ): Promise<ValidationError[]> {
   const validateOptions = {
     whitelist: true,
@@ -74,7 +74,7 @@ async function validateDtoInstances<T extends object>(
   if (isArray) {
     const arrayInstances = instances as T[];
     const validationPromises = arrayInstances.map((instance) =>
-      validate(instance, validateOptions)
+      validate(instance, validateOptions),
     );
     const validationResults = await Promise.all(validationPromises);
     return validationResults.flat();

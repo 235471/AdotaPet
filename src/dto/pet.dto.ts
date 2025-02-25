@@ -23,7 +23,7 @@ export class CreatePetDto {
   dataNascimento!: Date;
 
   @IsBoolean()
-  adotado!: boolean;
+  adotado = false;
 }
 
 export class UpdatePetDto {

@@ -5,6 +5,302 @@ info:
   description: API para gerenciamento de usuários, adotantes, pets e endereços.
 servers:
   - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    UsuarioResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            nome:
+              type: string
+            celular:
+              type: string
+    CreateUsuario:
+      type: object
+      required:
+        - nome
+        - email
+        - senha
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+        celular:
+          type: string
+          description: Número de celular (opcional)
+    UpdateUsuario:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+        celular:
+          type: string
+    UsuarioLogin:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        celular:
+          type: string
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        celular:
+          type: string
+        adotante:
+          $ref: '#/components/schemas/Adotante'
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - senha
+      properties:
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+    Endereco:
+      type: object
+      required:
+        - cidade
+        - estado
+      properties:
+        cidade:
+          type: string
+        estado:
+          type: string
+    Adotante:
+      type: object
+      properties:
+        id:
+          type: integer
+        usuario:
+          $ref: '#/components/schemas/Usuario'
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+        pets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pet'
+    AdocaoPets:
+      type: object
+      required:
+        - petIds
+      properties:
+        petIds:
+          type: array
+          items:
+            type: integer
+    CreatePet:
+      type: object
+      required:
+        - nome
+        - especie
+        - dataNascimento
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+    UpdatePet:
+      type: object
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+        adotante:
+          $ref: '#/components/schemas/Adotante'
+    PetResponse:
+      type: object
+      properties:
+        adotado:
+          type: boolean
+        nome:
+          type: string
+        especie:
+          type: string
+          enum:
+            - cachorro
+            - gato
+            - passaro
+            - tartaruga
+        dataNascimento:
+          type: string
+          format: date-time
+        porte:
+          type: string
+          enum:
+            - pequeno
+            - medio
+            - grande
+    AdotanteListItem:
+      type: object
+      properties:
+        usuario:
+          type: object
+          properties:
+            nome:
+              type: string
+            email:
+              type: string
+              format: email
+            celular:
+              type: string
+        endereco:
+          type: object
+          properties:
+            cidade:
+              type: string
+            estado:
+              type: string
+        pets:
+          type: array
+          items:
+            type: object
+            properties:
+              nome:
+                type: string
+              especie:
+                type: string
+                enum:
+                  - cachorro
+                  - gato
+                  - passaro
+                  - tartaruga
+              adotado:
+                type: boolean
+              dataNascimento:
+                type: string
+                format: date
+              porte:
+                type: string
+                enum:
+                  - pequeno
+                  - medio
+                  - grande
+    AdotanteListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdotanteListItem'
+    EnderecoUpdateResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            usuario:
+              type: object
+              properties:
+                nome:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                celular:
+                  type: string
+            endereco:
+              type: object
+              properties:
+                cidade:
+                  type: string
+                estado:
+                  type: string
 security:
   - bearerAuth: []
 paths:
@@ -39,6 +335,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /usuarios/{id}:
     put:
       summary: Atualiza um usuário existente
       tags:
@@ -140,7 +437,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
+                  $ref: '#/components/schemas/PetResponse'
+              example:
+                - adotado: false
+                  nome: 'Sam'
+                  especie: 'cachorro'
+                  dataNascimento: '2023-02-25T00:00:00.000Z'
+                  porte: 'medio'
   /pets/{id}:
     put:
       summary: Atualiza um pet existente
@@ -209,23 +512,35 @@ paths:
                   $ref: '#/components/schemas/Pet'
   /pets/search:
     get:
-      summary: Pesquisa pets por campo e valor
+      summary: Pesquisa pets por critérios
       tags:
         - Pets
-      security: [] # Endpoint público
+      security: []
       parameters:
         - in: query
-          name: campo
-          required: true
+          name: adotado
           schema:
-            type: string
-          description: Campo de pesquisa (nome, especie)
+            type: boolean
+          description: Filtra por status de adoção
+          required: false
         - in: query
-          name: valor
-          required: true
+          name: nome
           schema:
             type: string
-          description: Valor a ser pesquisado
+          description: Filtra por nome do pet (case insensitive)
+          required: false
+        - in: query
+          name: especie
+          schema:
+            type: string
+          description: Filtra por espécie (cachorro, gato, etc.)
+          required: false
+        - in: query
+          name: porte
+          schema:
+            type: string
+          description: Filtra por porte (pequeno, médio, grande)
+          required: false
       responses:
         '200':
           description: Lista de pets filtrados
@@ -234,7 +549,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
+                  $ref: '#/components/schemas/PetResponse'
   /adotantes:
     get:
       summary: Lista todos os adotantes
@@ -342,279 +657,3 @@ paths:
                     type: array
                     items:
                       type: string
-components:
-  schemas:
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-    UsuarioResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            id:
-              type: integer
-            nome:
-              type: string
-            celular:
-              type: string
-    securitySchemes:
-      bearerAuth:
-        type: http
-        scheme: bearer
-        bearerFormat: JWT
-    CreateUsuario:
-      type: object
-      required:
-        - nome
-        - email
-        - senha
-      properties:
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        senha:
-          type: string
-        celular:
-          type: string
-          description: Número de celular (opcional)
-    UpdateUsuario:
-      type: object
-      properties:
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        senha:
-          type: string
-        celular:
-          type: string
-    UsuarioLogin:
-      type: object
-      properties:
-        id:
-          type: integer
-        nome:
-          type: string
-        celular:
-          type: string
-    Usuario:
-      type: object
-      properties:
-        id:
-          type: integer
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        celular:
-          type: string
-        adotante:
-          $ref: '#/components/schemas/Adotante'
-    LoginRequest:
-      type: object
-      required:
-        - email
-        - senha
-      properties:
-        email:
-          type: string
-          format: email
-        senha:
-          type: string
-    Endereco:
-      type: object
-      required:
-        - cidade
-        - estado
-      properties:
-        cidade:
-          type: string
-        estado:
-          type: string
-    # Esquema antigo de Adotante (pode ser mantido para outras operações)
-    Adotante:
-      type: object
-      properties:
-        id:
-          type: integer
-        usuario:
-          $ref: '#/components/schemas/Usuario'
-        endereco:
-          $ref: '#/components/schemas/Endereco'
-        pets:
-          type: array
-          items:
-            $ref: '#/components/schemas/Pet'
-    AdocaoPets:
-      type: object
-      required:
-        - petIds
-      properties:
-        petIds:
-          type: array
-          items:
-            type: integer
-    CreatePet:
-      type: object
-      required:
-        - nome
-        - especie
-        - dataNascimento
-      properties:
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date
-        adotado:
-          type: boolean
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-    UpdatePet:
-      type: object
-      properties:
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date
-        adotado:
-          type: boolean
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-    Pet:
-      type: object
-      properties:
-        id:
-          type: integer
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date
-        adotado:
-          type: boolean
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-        adotante:
-          $ref: '#/components/schemas/Adotante'
-    # Novo esquema para a resposta do GET /adotantes
-    AdotanteListItem:
-      type: object
-      properties:
-        usuario:
-          type: object
-          properties:
-            nome:
-              type: string
-            email:
-              type: string
-              format: email
-            celular:
-              type: string
-        endereco:
-          type: object
-          properties:
-            cidade:
-              type: string
-            estado:
-              type: string
-        pets:
-          type: array
-          items:
-            type: object
-            properties:
-              nome:
-                type: string
-              especie:
-                type: string
-                enum:
-                  - cachorro
-                  - gato
-                  - passaro
-                  - tartaruga
-              adotado:
-                type: boolean
-              dataNascimento:
-                type: string
-                format: date
-              porte:
-                type: string
-                enum:
-                  - pequeno
-                  - medio
-                  - grande
-    AdotanteListResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdotanteListItem'
-    # Novo esquema para a resposta do PUT /adotantes/{id} (atualização do endereço)
-    EnderecoUpdateResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            usuario:
-              type: object
-              properties:
-                nome:
-                  type: string
-                email:
-                  type: string
-                  format: email
-                celular:
-                  type: string
-            endereco:
-              type: object
-              properties:
-                cidade:
-                  type: string
-                estado:
-                  type: string

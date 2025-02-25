@@ -1,5 +1,5 @@
-import { UsuarioEntity } from '../../entities/UsuarioEntity';
-import { TipoReponseBodyUsuario } from '../../types/tiposUsuario';
+import { UsuarioEntity } from "../../entities/UsuarioEntity";
+import { TipoReponseBodyUsuario } from "../../types/tiposUsuario";
 
 export interface InterfaceUsuarioRepository {
   findByFields(filters: Record<string, any>): Promise<UsuarioEntity | null>;

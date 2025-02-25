@@ -18,6 +18,14 @@ type TipoResponseParamsEndereco = {
   id: string;
 };
 
+type TipoRequestParamsAdotante = {
+  adotanteId: string;
+};
+
+type TipoResponseBodyAdotante = {
+  petIds: number[];
+};
+
 // Para GET não precisamos de RequestBody, apenas Response
 type TipoResponseBodyAdotantes = {
   data?: {
@@ -27,12 +35,12 @@ type TipoResponseBodyAdotantes = {
   }[];
 };
 
-// Caso precise de filtros via query params
-type TipoRequestQueryAdotantes = {
-  email?: string;
-  cidade?: string;
-  estado?: string;
-  temPets?: boolean;
+type TipoResponseBodyAdotaPet = {
+  data?: {
+    message: string;
+    pets: Pick<PetEntity, 'id' | 'nome' | 'porte' | 'especie' | 'dataNascimento' | 'adotado'>[];
+    errors?: string[];
+  }[];
 };
 
 export {
@@ -40,5 +48,7 @@ export {
   TipoResponseBodyEndereco,
   TipoResponseParamsEndereco,
   TipoResponseBodyAdotantes,
-  TipoRequestQueryAdotantes,
+  TipoRequestParamsAdotante,
+  TipoResponseBodyAdotante,
+  TipoResponseBodyAdotaPet,
 };
