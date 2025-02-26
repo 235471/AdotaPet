@@ -1,23 +1,50 @@
-import { Request, Response, NextFunction } from "express";
-import { ClassConstructor, plainToInstance } from "class-transformer";
-import { validate, ValidationError } from "class-validator";
-import { FormattedError } from "../interface/FormattedError";
-import { badRequest } from "../error/badRequest";
+import { Request, Response, NextFunction } from 'express';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { validate, ValidationError } from 'class-validator';
+import { badRequest } from '../error/badRequest';
+import { formatErrors } from '../utils/formatErrors';
 
-interface PhoneValidatable {
-  validatePhone: () => void;
+// Interfaces para os tipos de opções
+interface BaseOptions {
+  isUpdate?: boolean;
 }
+
+interface ArrayOptions extends BaseOptions {
+  isArray: true;
+}
+
+interface SingleOptions extends BaseOptions {
+  isArray?: false;
+}
+
+type ValidateOptions = ArrayOptions | SingleOptions;
+
+// Overloads mais precisos
+export function validateDto<T extends object>(
+  dto: ClassConstructor<T>
+): (req: Request, res: Response, next: NextFunction) => Promise<void>;
 
 export function validateDto<T extends object>(
   dto: ClassConstructor<T>,
-  isArray = false,
-  isUpdate = false,
-) {
+  options: SingleOptions
+): (req: Request, res: Response, next: NextFunction) => Promise<void>;
+
+export function validateDto<T extends object>(
+  dto: ClassConstructor<T>,
+  options: ArrayOptions
+): (req: Request, res: Response, next: NextFunction) => Promise<void>;
+
+// Implementação que unifica
+export function validateDto<T extends object>(dto: ClassConstructor<T>, options?: ValidateOptions) {
+  // Valores padrão
+  const isArray = options?.isArray || false;
+  const isUpdate = options?.isUpdate || false;
+
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Validação do formato do body
       if (!isValidBodyFormat(req.body, isArray)) {
-        const expectedFormat = isArray ? "array" : "objeto";
+        const expectedFormat = isArray ? 'array' : 'objeto';
         throw badRequest(`O corpo da requisição deve ser um ${expectedFormat}`);
       }
 
@@ -27,14 +54,11 @@ export function validateDto<T extends object>(
       // Validação dos dados
       const errors = await validateDtoInstances(dtoInstances, isArray, isUpdate);
 
-      if (errors.length > 0) {
-        const errorDetails = formatErrors(errors);
-        throw badRequest("Dados inválidos", errorDetails);
-      }
-
-      // Se o DTO tem validação customizada do celular, chamamos ela aqui
-      if (!Array.isArray(dtoInstances) && isPhoneValidatable(dtoInstances)) {
-        dtoInstances.validatePhone();
+      const filteredErros = filterEmptyConstraints(errors);
+      
+      if (filteredErros.length > 0) {
+        const errorDetails = formatErrors(filteredErros);
+        throw badRequest('Dados inválidos', errorDetails);
       }
 
       req.body = dtoInstances;
@@ -43,10 +67,6 @@ export function validateDto<T extends object>(
       next(err);
     }
   };
-}
-
-function isPhoneValidatable(obj: any): obj is PhoneValidatable {
-  return typeof obj.validatePhone === "function";
 }
 
 // Funções auxiliares
@@ -63,7 +83,7 @@ function convertToDto<T>(body: unknown, dto: ClassConstructor<T>, isArray: boole
 async function validateDtoInstances<T extends object>(
   instances: T | T[],
   isArray: boolean,
-  isUpdate: boolean,
+  isUpdate: boolean
 ): Promise<ValidationError[]> {
   const validateOptions = {
     whitelist: true,
@@ -74,7 +94,7 @@ async function validateDtoInstances<T extends object>(
   if (isArray) {
     const arrayInstances = instances as T[];
     const validationPromises = arrayInstances.map((instance) =>
-      validate(instance, validateOptions),
+      validate(instance, validateOptions)
     );
     const validationResults = await Promise.all(validationPromises);
     return validationResults.flat();
@@ -83,9 +103,14 @@ async function validateDtoInstances<T extends object>(
   return validate(instances as T, validateOptions);
 }
 
-function formatErrors(errors: ValidationError[]): FormattedError[] {
-  return errors.map((err) => ({
-    property: err.property,
-    constraints: err.constraints,
-  }));
+function filterEmptyConstraints(errors: ValidationError[]): ValidationError[] {
+  return errors.map((error) => {
+    const details = Object.entries(error.constraints || {}).filter(
+      ([key, value]) => value !== '' // Remove constraints com valor vazio
+    );
+    return {
+      ...error,
+      constraints: Object.fromEntries(details),
+    };
+  });
 }

@@ -1,18 +1,18 @@
 /* eslint-disable indent */
-import { Exclude, Expose } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { badRequest } from "../error/badRequest";
+import { Exclude, Expose } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from 'class-validator';
+import { IsNotBlank } from '../decorators/IsNotBlank.decorator';
+import { IsValidMobileNumber } from '../decorators/IsValidPhoneNumber.decorator';
 
 export class UsuarioDto {
   @Expose()
   @IsString()
-  @IsNotEmpty({ message: "Nome é obrigatório" })
+  @IsNotEmpty({ message: 'Nome é obrigatório' })
   nome!: string;
 
   @Expose()
   @IsString()
-  @IsNotEmpty({ message: "Email é obrigatório" })
+  @IsNotEmpty({ message: 'Email é obrigatório' })
   email!: string;
 
   @Expose()
@@ -22,7 +22,7 @@ export class UsuarioDto {
 
   @Exclude({ toPlainOnly: true })
   @IsString()
-  @IsNotEmpty({ message: "Senha é obrigatória" })
+  @IsNotEmpty({ message: 'Senha é obrigatória' })
   senha!: string;
 
   @Expose()
@@ -32,32 +32,39 @@ export class UsuarioDto {
 }
 
 export class CreateUsuarioDto {
-  @IsString()
-  @IsNotEmpty({ message: "Nome é obrigatório" })
+  @IsString({ message: 'Nome deve ser uma string' })
+  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  @IsNotBlank()
   nome!: string;
 
-  @IsString()
-  @IsNotEmpty({ message: "Email é obrigatório" })
-  @IsEmail({}, { message: "Email inválido" })
+  @IsString({ message: 'Email deve ser uma string' })
+  @IsNotEmpty({ message: 'Email é obrigatório' })
+  @IsEmail({}, { message: 'Email inválido' })
+  @IsNotBlank()
   email!: string;
 
-  @IsString()
-  @IsNotEmpty({ message: "Senha é obrigatória" })
+  @IsString({ message: 'Senha deve ser uma string' })
+  @IsNotEmpty({ message: 'Senha é obrigatória' })
+  @IsNotBlank()
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    {
+      message:
+        'A senha deve ter no mínimo 8 caracteres e conter 1 letra maiúscula, 1 número e 1 caractere especial (!@#$%^&*)',
+    }
+  )
   senha!: string;
 
   @IsString()
   @IsOptional()
+  @IsValidMobileNumber()
   celular?: string;
-
-  // Validação do celular
-  validatePhone() {
-    if (this.celular) {
-      const phoneNumber = parsePhoneNumberFromString(this.celular, "BR");
-      if (!phoneNumber || !phoneNumber.isValid()) {
-        throw badRequest("Celular inválido. Verifique o formato e os números.");
-      }
-    }
-  }
 }
 
 export class UpdateUsuarioDto {
@@ -71,19 +78,23 @@ export class UpdateUsuarioDto {
 
   @IsString()
   @IsOptional()
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    {
+      message:
+        'A senha deve ter no mínimo 8 caracteres e conter 1 letra maiúscula, 1 número e 1 caractere especial (!@#$%^&*)',
+    }
+  )
   senha?: string;
 
   @IsString()
   @IsOptional()
+  @IsValidMobileNumber()
   celular?: string;
-
-  // Validação do celular
-  validatePhone() {
-    if (this.celular) {
-      const phoneNumber = parsePhoneNumberFromString(this.celular, "BR");
-      if (!phoneNumber || !phoneNumber.isValid()) {
-        throw new Error("Celular inválido. Verifique o formato e os números.");
-      }
-    }
-  }
 }

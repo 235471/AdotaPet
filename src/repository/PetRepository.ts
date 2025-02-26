@@ -40,7 +40,7 @@ export class PetRepository implements InterfacePetRepository {
         data: {
           id: pet.id,
           nome: pet.nome,
-          porte: pet.porte,
+          porte: pet.porte !== null ? pet.porte : undefined,
           especie: pet.especie,
           dataNascimento: pet.dataNascimento,
           adotado: pet.adotado,
@@ -61,15 +61,17 @@ export class PetRepository implements InterfacePetRepository {
   }
 
   async filterBy(queryObject: TipoRequestQueryPets): Promise<TipoResponseBodyPet> {
-
-    const alias: string = 'pet'
+    const alias: string = 'pet';
     const queryBuilder = this.repository.createQueryBuilder(alias);
 
     Object.entries(queryObject).forEach(([key, value]) => {
-      // Usar LOWER() para garantir case insensitivity    
+      if (Array.isArray(value)) {
+        queryBuilder.andWhere(`LOWER(${alias}.${key}) IN (:...${key})`, { [key]: value });
+      } else {
         queryBuilder.andWhere(`LOWER(${alias}.${key}) = LOWER(:${key})`, { [key]: value });
+      }
     });
-    
+
     const result = await queryBuilder.getMany();
 
     const responseData = {
@@ -80,7 +82,7 @@ export class PetRepository implements InterfacePetRepository {
         especie: pet.especie,
         dataNascimento: pet.dataNascimento,
         adotado: pet.adotado,
-      }))
+      })),
     };
 
     return responseData;

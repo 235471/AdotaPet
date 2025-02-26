@@ -1,8 +1,9 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToOne } from "typeorm";
-import { AdotanteEntity } from "./AdotanteEntity";
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToOne, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { AdotanteEntity } from './AdotanteEntity';
+import { criarHashSenha } from '../utils/passwordHash';
 
-@Entity("usuarios")
+@Entity('usuarios')
 export class UsuarioEntity {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -11,17 +12,22 @@ export class UsuarioEntity {
   nome: string;
 
   @Column()
-  @Unique(["email"])
+  @Unique(['email'])
   email: string;
 
   @Column()
   senha: string;
 
-  @Column({ default: "" })
+  @Column({ default: '' })
   celular?: string;
 
   @OneToOne(() => AdotanteEntity, (adotante) => adotante.usuario)
   adotante?: AdotanteEntity;
+
+  @BeforeInsert()
+  async hashSenha() {
+    if (this.senha) this.senha = await criarHashSenha(this.senha)
+    }
 
   constructor(nome: string, email: string, senha: string, celular?: string) {
     this.nome = nome;

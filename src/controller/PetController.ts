@@ -12,7 +12,7 @@ import {
 import { badRequest } from '../error/badRequest';
 
 export class PetController implements IPetController {
-  constructor(private repository: PetRepository) { }
+  constructor(private repository: PetRepository) {}
 
   async createPets(
     req: Request<TipoRequestParamsPet, {}, TipoRequestBodyPetArray>,
@@ -62,14 +62,14 @@ export class PetController implements IPetController {
     res: Response<TipoResponseBodyPet>,
     next: NextFunction
   ): Promise<void> {
-    try {
-      const queryObject  = req.query;
-      
-      const listPet = await this.repository.filterBy(queryObject);
-      res.status(200).json(listPet);
-    } catch (err) {
-      next(err);
-    }
+    // try {
+    const queryObject = req.query;
+    
+    const listPet = await this.repository.filterBy(queryObject);
+    res.status(200).json(listPet);
+    // } catch (err) {
+    //   next(err);
+    // }
   }
 
   async updatePet(
@@ -84,7 +84,7 @@ export class PetController implements IPetController {
       }
       const updatePet: Partial<PetEntity> = req.body as Partial<PetEntity>;
       await this.repository.updatePet(parseInt(id, 10), updatePet);
-      res.status(204)
+      res.status(204).send();
     } catch (err: unknown) {
       next(err);
     }
@@ -100,7 +100,7 @@ export class PetController implements IPetController {
       if (!id) {
         throw badRequest('ID parameter is missing');
       }
-      await this.repository.deletePet(parseInt(id,10));
+      await this.repository.deletePet(parseInt(id, 10));
       res.status(204);
     } catch (err: unknown) {
       next(err);

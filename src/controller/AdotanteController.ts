@@ -5,7 +5,7 @@ import { PetEntity } from '../entities/PetEntity';
 import { PetRepository } from '../repository/PetRepository';
 import { adocaoPetsDto } from '../dto/adocaoPets.dto';
 import { EnderecoDto } from '../dto/endereco.dto';
-import { AdotanteDTOFormatted } from '../dto/adotante.dto';
+
 import {
   TipoRequestBodyEndereco,
   TipoRequestParamsAdotante,
@@ -15,6 +15,7 @@ import {
   TipoResponseBodyEndereco,
   TipoResponseParamsEndereco,
 } from '../types/tipoAdotante';
+import { AdotanteDTOFormatted } from '../dto/adotante.dto';
 
 export class AdotanteController {
   constructor(
