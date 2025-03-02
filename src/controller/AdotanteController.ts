@@ -19,8 +19,9 @@ import { AdotanteDTOFormatted } from '../dto/adotante.dto';
 import { listAdotanteAbrigo } from '../utils/listAdotanteAbrigo';
 import { adotanteRep } from '../constants/repository';
 import { updateEndereco } from '../utils/updateEndereco';
+import { IAdotanteController } from '../interface/IAdotanteController';
 
-export class AdotanteController {
+export class AdotanteController implements IAdotanteController {
   constructor(
     private repository: AdotanteRepository,
     private petRepository: PetRepository

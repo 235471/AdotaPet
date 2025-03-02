@@ -7,8 +7,9 @@ import {
   TipoRequestParamsUsuario,
   TipoRequestBodyUsuario,
 } from '../types/tiposUsuario';
+import { IUsuarioController } from '../interface/IUsuarioController';
 
-export class UsuarioController {
+export class UsuarioController implements IUsuarioController {
   constructor(private repository: UsuarioRepository) {}
 
   async createUsuario(
@@ -17,7 +18,7 @@ export class UsuarioController {
     next: NextFunction
   ): Promise<void> {
     const tipoUsuario = req.tipoUsuario;
-    
+
     const usuario = req.body;
     const newUser = await this.repository.createUsuario(usuario, tipoUsuario!);
     res.status(201).json(newUser);

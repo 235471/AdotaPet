@@ -10,8 +10,9 @@ import { EnderecoDto } from '../dto/endereco.dto';
 import { listAdotanteAbrigo } from '../utils/listAdotanteAbrigo';
 import { abrigoRep } from '../constants/repository';
 import { updateEndereco } from '../utils/updateEndereco';
+import { IAbrigoController } from '../interface/IAbrigoController';
 
-export class AbrigoController {
+export class AbrigoController implements IAbrigoController {
   constructor(private repository: AbrigoRepository) {}
 
   async listAbrigo(
@@ -28,7 +29,6 @@ export class AbrigoController {
     res: Response<TipoResponseBodyEndereco>,
     next: NextFunction
   ): Promise<void> {
-     
     const id: number = parseInt(req.params.id, 10);
     const endereco: EnderecoDto = req.body;
 
