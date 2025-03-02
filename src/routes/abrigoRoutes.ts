@@ -11,6 +11,7 @@ import { IPetController } from '../interface/PetController';
 import { EnderecoDto } from '../dto/endereco.dto';
 import { AdotanteController } from '../controller/AdotanteController';
 import { AdotanteRepository } from '../repository/AdotanteRepository';
+import { verificaIdMiddleware } from '../middleware/validateParams';
 
 const abrigoRepository = new AbrigoRepository(abrigoRep);
 const abrigoController = new AbrigoController(abrigoRepository);
@@ -28,6 +29,7 @@ router.get('/', abrigoController.listAbrigo.bind(abrigoController));
 router.patch(
   '/:id',
   authentication,
+  verificaIdMiddleware,
   validateDto(EnderecoDto, { isUpdate: true }),
   abrigoController.updateAbrigoEndereco.bind(abrigoController)
 );
@@ -35,6 +37,7 @@ router.patch(
 router.post(
   '/:id/pets',
   authentication,
+  verificaIdMiddleware,
   validateDto(CreatePetDto, { isArray: true }),
   petController.createPets.bind(petController)
 );

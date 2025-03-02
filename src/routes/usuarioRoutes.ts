@@ -8,6 +8,7 @@ import { authentication } from '../middleware/authentication';
 import { CreateAbrigoDto } from '../dto/abrigo.dto';
 import { addTipoUsuario } from '../middleware/tipoUsuario';
 import { UserTypes } from '../enum/userTypes';
+import { verificaIdMiddleware } from '../middleware/validateParams';
 
 const router = Router();
 
@@ -31,11 +32,17 @@ router.post(
 router.put(
   '/:id',
   authentication,
+  verificaIdMiddleware,
   validateDto(UpdateUsuarioDto, { isUpdate: true }),
   usuarioController.updateUsuario.bind(usuarioController)
 );
 
-router.delete('/:id', authentication, usuarioController.deleteUsuario.bind(usuarioController));
+router.delete(
+  '/:id',
+  authentication,
+  verificaIdMiddleware,
+  usuarioController.deleteUsuario.bind(usuarioController)
+);
 
 router.post('/login', usuarioController.login.bind(usuarioController));
 

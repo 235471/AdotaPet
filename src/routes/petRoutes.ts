@@ -8,6 +8,7 @@ import { authentication } from '../middleware/authentication';
 import { abrigoRep, petRep } from '../constants/repository';
 import { validateQueryParams } from '../middleware/validateQueryParams';
 import { AbrigoRepository } from '../repository/AbrigoRepository';
+import { verificaIdMiddleware } from '../middleware/validateParams';
 
 const router = Router();
 
@@ -31,10 +32,16 @@ router.post(
 router.put(
   '/:id',
   authentication,
+  verificaIdMiddleware,
   validateDto(UpdatePetDto, { isUpdate: true }),
   petController.updatePet.bind(petController)
 );
 
-router.delete('/:id', authentication, petController.deletePet.bind(petController));
+router.delete(
+  '/:id',
+  authentication,
+  verificaIdMiddleware,
+  petController.deletePet.bind(petController)
+);
 
 export default router;

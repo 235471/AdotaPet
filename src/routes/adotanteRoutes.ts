@@ -7,6 +7,7 @@ import { PetRepository } from '../repository/PetRepository';
 import { EnderecoDto } from '../dto/endereco.dto';
 import { authentication } from '../middleware/authentication';
 import { adotanteRep, petRep } from '../constants/repository';
+import { verificaIdMiddleware } from '../middleware/validateParams';
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.get('/', adotanteController.listAdotante.bind(adotanteController));
 router.patch(
   '/:id',
   authentication,
+  verificaIdMiddleware,
   validateDto(EnderecoDto, { isUpdate: true }),
   adotanteController.updateEndereco.bind(adotanteController)
 );
@@ -26,6 +28,7 @@ router.patch(
 router.put(
   '/:adotanteId/pets',
   authentication,
+  verificaIdMiddleware,
   validateDto(adocaoPetsDto, { isUpdate: true }),
   adotanteController.adotaPet.bind(adotanteController)
 );
