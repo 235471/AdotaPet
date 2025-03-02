@@ -1,9 +1,17 @@
-import { UsuarioEntity } from "../entities/UsuarioEntity";
+import { UsuarioEntity } from '../entities/UsuarioEntity';
 
-type TipoRequestBodyUsuario = Omit<UsuarioEntity, "id">;
+type TipoRequestBodyUsuario = Omit<UsuarioEntity, 'id'>;
 type TipoReponseBodyUsuario = {
-  data?: Pick<UsuarioEntity, "id" | "nome" | "celular">;
+  data?: Pick<UsuarioEntity, 'id' | 'nome' | 'celular'>;
 };
-type TipoReponseParamsUsuario = { id: string };
+type TipoRequestParamsUsuario = { id: string };
+type TipoRequestParamsUsuarioCreate = {
+  tipoUsuario: string;
+};
 
-export { TipoRequestBodyUsuario, TipoReponseBodyUsuario, TipoReponseParamsUsuario };
+export {
+  TipoRequestBodyUsuario,
+  TipoReponseBodyUsuario,
+  TipoRequestParamsUsuario,
+  TipoRequestParamsUsuarioCreate,
+};

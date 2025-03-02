@@ -13,51 +13,39 @@ export class PetRepository implements InterfacePetRepository {
   }
 
   async createPet(pet: TipoRequestBodyPet): Promise<TipoResponseBodyPet> {
-    try {
-      const savedPet = await this.repository.save(pet);
+    const savedPet = await this.repository.save(pet);
 
-      const result = {
-        data: {
-          id: savedPet.id,
-          nome: savedPet.nome,
-          porte: savedPet.porte,
-          especie: savedPet.especie,
-          dataNascimento: savedPet.dataNascimento,
-          adotado: savedPet.adotado,
-        },
-      };
+    const result = {
+      data: {
+        id: savedPet.id,
+        nome: savedPet.nome,
+        porte: savedPet.porte,
+        especie: savedPet.especie,
+        dataNascimento: savedPet.dataNascimento,
+        adotado: savedPet.adotado,
+      },
+    };
 
-      return result;
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao criar pet', 500, err);
-    }
+    return result;
   }
 
   async listPet(): Promise<TipoResponseBodyPet[]> {
-    try {
-      const petList = await this.repository.find({ where: { adotado: false } });
-      const result = petList.map((pet) => ({
-        data: {
-          id: pet.id,
-          nome: pet.nome,
-          porte: pet.porte !== null ? pet.porte : undefined,
-          especie: pet.especie,
-          dataNascimento: pet.dataNascimento,
-          adotado: pet.adotado,
-        },
-      }));
-      return result;
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao listar pets', 500, err);
-    }
+    const petList = await this.repository.find({ where: { adotado: false } });
+    const result = petList.map((pet) => ({
+      data: {
+        id: pet.id,
+        nome: pet.nome,
+        porte: pet.porte !== null ? pet.porte : undefined,
+        especie: pet.especie,
+        dataNascimento: pet.dataNascimento,
+        adotado: pet.adotado,
+      },
+    }));
+    return result;
   }
 
   async filterByPorte(porte: PetEntity['porte']): Promise<Array<PetEntity> | Promise<PetEntity[]>> {
-    try {
-      return await this.repository.find({ where: { porte } });
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao lista pets por porte', 500, err);
-    }
+    return await this.repository.find({ where: { porte } });
   }
 
   async filterBy(queryObject: TipoRequestQueryPets): Promise<TipoResponseBodyPet> {
@@ -89,13 +77,9 @@ export class PetRepository implements InterfacePetRepository {
   }
 
   async updatePet(id: number, pet: Partial<PetEntity>): Promise<void> {
-    try {
-      const findPet: PetEntity = await this.findPetById(id);
-      if (!findPet) throw notFound('Pet não encontrado com id: ', id);
-      await this.repository.update(id, pet);
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao atualizar pet', 500, err);
-    }
+    const findPet: PetEntity = await this.findPetById(id);
+    Object.assign(findPet, pet);
+    await this.repository.save(findPet);
   }
 
   async listarPetAdocao(
@@ -127,31 +111,18 @@ export class PetRepository implements InterfacePetRepository {
   }
 
   async findPetById(id: number): Promise<PetEntity> {
-    try {
-      const findPet = await this.repository.findOneBy({ id });
-      if (!findPet) throw notFound('Pet não encontrado', { id });
-      return findPet;
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao buscar pet por ID', 500, err);
-    }
+    const findPet = await this.repository.findOneBy({ id });
+    if (!findPet) throw notFound('Pet não encontrado', { id });
+    return findPet;
   }
 
   async findPet(options: object): Promise<PetEntity | null> {
-    try {
-      const findPet = await this.repository.findOne(options);
-      return findPet;
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao buscar pet', 500, err);
-    }
+    const findPet = await this.repository.findOne(options);
+    return findPet;
   }
 
   async deletePet(id: number): Promise<void> {
-    try {
-      const findPet: PetEntity = await this.findPetById(id);
-      if (!findPet) throw notFound('Pet não encontrado com id: ', id);
-      await this.repository.delete(id);
-    } catch (err: unknown) {
-      throw new CustomError('Erro ao deletar pet', 500, err);
-    }
+    const findPet: PetEntity = await this.findPetById(id);
+    await this.repository.softDelete(id);
   }
 }

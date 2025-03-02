@@ -41,31 +41,27 @@ export function validateDto<T extends object>(dto: ClassConstructor<T>, options?
   const isUpdate = options?.isUpdate || false;
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      // Validação do formato do body
-      if (!isValidBodyFormat(req.body, isArray)) {
-        const expectedFormat = isArray ? 'array' : 'objeto';
-        throw badRequest(`O corpo da requisição deve ser um ${expectedFormat}`);
-      }
-
-      // Conversão dos dados para instâncias do DTO
-      const dtoInstances = convertToDto(req.body, dto, isArray);
-
-      // Validação dos dados
-      const errors = await validateDtoInstances(dtoInstances, isArray, isUpdate);
-
-      const filteredErros = filterEmptyConstraints(errors);
-      
-      if (filteredErros.length > 0) {
-        const errorDetails = formatErrors(filteredErros);
-        throw badRequest('Dados inválidos', errorDetails);
-      }
-
-      req.body = dtoInstances;
-      next();
-    } catch (err) {
-      next(err);
+    // Validação do formato do body
+    if (!isValidBodyFormat(req.body, isArray)) {
+      const expectedFormat = isArray ? 'array' : 'objeto';
+      throw badRequest(`O corpo da requisição deve ser um ${expectedFormat}`);
     }
+
+    // Conversão dos dados para instâncias do DTO
+    const dtoInstances = convertToDto(req.body, dto, isArray);
+
+    // Validação dos dados
+    const errors = await validateDtoInstances(dtoInstances, isArray, isUpdate);
+
+    const filteredErros = filterEmptyConstraints(errors);
+
+    if (filteredErros.length > 0) {
+      const errorDetails = formatErrors(filteredErros);
+      throw badRequest('Dados inválidos', errorDetails);
+    }
+
+    req.body = dtoInstances;
+    next();
   };
 }
 

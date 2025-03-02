@@ -4,7 +4,7 @@ import { UsuarioEntity } from '../entities/UsuarioEntity';
 import { LoginRequestBody } from '../interface/LoginRequestBody';
 import {
   TipoReponseBodyUsuario,
-  TipoReponseParamsUsuario,
+  TipoRequestParamsUsuario,
   TipoRequestBodyUsuario,
 } from '../types/tiposUsuario';
 
@@ -12,56 +12,42 @@ export class UsuarioController {
   constructor(private repository: UsuarioRepository) {}
 
   async createUsuario(
-    req: Request<unknown, unknown, TipoRequestBodyUsuario>,
+    req: Request<{}, {}, TipoRequestBodyUsuario>,
     res: Response<TipoReponseBodyUsuario>,
     next: NextFunction
   ): Promise<void> {
-    try {
-      const usuario = req.body;
-      const newUser = await this.repository.createUsuario(usuario);
-      res.status(201).json(newUser);
-    } catch (err: unknown) {
-      next(err);
-    }
+    const tipoUsuario = req.tipoUsuario;
+    
+    const usuario = req.body;
+    const newUser = await this.repository.createUsuario(usuario, tipoUsuario!);
+    res.status(201).json(newUser);
   }
 
   async updateUsuario(
-    req: Request<TipoReponseParamsUsuario, unknown, TipoRequestBodyUsuario>,
+    req: Request<TipoRequestParamsUsuario, {}, TipoRequestBodyUsuario>,
     res: Response<TipoReponseBodyUsuario>,
     next: NextFunction
   ): Promise<void> {
-    try {
-      const id: number = parseInt(req.params.id, 10);
-      const user: Partial<UsuarioEntity> = req.body as Partial<UsuarioEntity>;
-      const updatedUser = await this.repository.updateUsuario(id, user);
-      res.status(200).json(updatedUser);
-    } catch (err) {
-      next(err);
-    }
+    const id: number = parseInt(req.params.id, 10);
+    const user: Partial<UsuarioEntity> = req.body as Partial<UsuarioEntity>;
+    const updatedUser = await this.repository.updateUsuario(id, user);
+    res.status(200).json(updatedUser);
   }
 
   async deleteUsuario(
-    req: Request<TipoReponseParamsUsuario, unknown, TipoRequestBodyUsuario>,
-    res: Response<TipoReponseBodyUsuario>,
+    req: Request<TipoRequestParamsUsuario, {}, TipoRequestBodyUsuario>,
+    res: Response,
     next: NextFunction
   ): Promise<void> {
-    try {
-      const id: number = parseInt(req.params.id, 10);
-      await this.repository.deleteUsuario(id);
-      res.status(204).json();
-    } catch (err) {
-      next(err);
-    }
+    const id: number = parseInt(req.params.id, 10);
+    await this.repository.deleteUsuario(id);
+    res.status(204).json();
   }
 
-  async login(req: Request<unknown, unknown, LoginRequestBody>, res: Response, next: NextFunction) {
-    try {
-      const { email, senha } = req.body;
+  async login(req: Request<{}, {}, LoginRequestBody>, res: Response, next: NextFunction) {
+    const { email, senha } = req.body;
 
-      const jwt = await this.repository.login(email, senha);
-      res.status(200).send(jwt);
-    } catch (err: unknown) {
-      next(err);
-    }
+    const jwt = await this.repository.login(email, senha);
+    res.status(200).send(jwt);
   }
 }

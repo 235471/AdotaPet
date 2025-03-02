@@ -6,32 +6,28 @@ import { formatErrors } from '../utils/formatErrors';
 
 export function validateQueryParams<T extends object>(dto: ClassConstructor<T>) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      // Normalizar valores string no req.query para lowercase
-      const normalizedQuery = normalizeQueryValues(req.query);
+    // Normalizar valores string no req.query para lowercase
+    const normalizedQuery = normalizeQueryValues(req.query);
 
-      // Converter query params para a instância do DTO
-      const queryInstance = plainToInstance(dto, normalizedQuery, {
-        enableImplicitConversion: true, // Converte strings para os tipos apropriados
-      });
+    // Converter query params para a instância do DTO
+    const queryInstance = plainToInstance(dto, normalizedQuery, {
+      enableImplicitConversion: true, // Converte strings para os tipos apropriados
+    });
+    
+    // Validar a instância
+    const errors = await validate(queryInstance, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      skipMissingProperties: true,
+    });
 
-      // Validar a instância
-      const errors = await validate(queryInstance, {
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        skipMissingProperties: true,
-      });
-
-      if (errors.length > 0) {
-        const errorDetails = formatErrors(errors);
-        throw badRequest('Parâmetros de consulta inválidos', errorDetails);
-      }
-
-      req.query = queryInstance as any;
-      next();
-    } catch (err) {
-      next(err);
+    if (errors.length > 0) {
+      const errorDetails = formatErrors(errors);
+      throw badRequest('Parâmetros de consulta inválidos', errorDetails);
     }
+
+    req.query = queryInstance as any;
+    next();
   };
 }
 

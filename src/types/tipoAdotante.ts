@@ -14,7 +14,7 @@ type TipoResponseBodyEndereco = {
 };
 
 // Params para identificar qual usuário está sendo atualizado
-type TipoResponseParamsEndereco = {
+type TipoRequestParamsEndereco = {
   id: string;
 };
 
@@ -46,7 +46,7 @@ type TipoResponseBodyAdotaPet = {
 export {
   TipoRequestBodyEndereco,
   TipoResponseBodyEndereco,
-  TipoResponseParamsEndereco,
+  TipoRequestParamsEndereco,
   TipoResponseBodyAdotantes,
   TipoRequestParamsAdotante,
   TipoResponseBodyAdotante,

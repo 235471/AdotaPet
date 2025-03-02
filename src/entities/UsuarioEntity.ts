@@ -1,7 +1,17 @@
 /* eslint-disable indent */
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToOne, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  BeforeInsert,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import { AdotanteEntity } from './AdotanteEntity';
 import { criarHashSenha } from '../utils/passwordHash';
+import { AbrigoEntity } from './AbrigoEntity';
 
 @Entity('usuarios')
 export class UsuarioEntity {
@@ -11,23 +21,37 @@ export class UsuarioEntity {
   @Column()
   nome: string;
 
-  @Column()
-  @Unique(['email'])
+  @Column({ unique: true })
   email: string;
 
   @Column()
   senha: string;
 
-  @Column({ default: '' })
+  @Column({ default: '', unique: true })
   celular?: string;
 
-  @OneToOne(() => AdotanteEntity, (adotante) => adotante.usuario)
+  @OneToOne(() => AdotanteEntity, (adotante) => adotante.usuario, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   adotante?: AdotanteEntity;
+
+  @OneToOne(() => AbrigoEntity, (abrigo) => abrigo.usuario, { cascade: true, onDelete: 'CASCADE' })
+  abrigo?: AbrigoEntity;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt!: Date;
 
   @BeforeInsert()
   async hashSenha() {
-    if (this.senha) this.senha = await criarHashSenha(this.senha)
-    }
+    if (this.senha) this.senha = await criarHashSenha(this.senha);
+  }
 
   constructor(nome: string, email: string, senha: string, celular?: string) {
     this.nome = nome;

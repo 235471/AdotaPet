@@ -11,7 +11,6 @@ type TipoResponseBodyPet = {
   data?:
     | Pick<PetEntity, 'id' | 'nome' | 'porte' | 'especie' | 'dataNascimento' | 'adotado'>
     | Pick<PetEntity, 'id' | 'nome' | 'porte' | 'especie' | 'dataNascimento' | 'adotado'>[];
-  error?: unknown;
 };
 
 type TipoResponseBodyPetAdotado = Pick<
@@ -20,7 +19,7 @@ type TipoResponseBodyPetAdotado = Pick<
 >[];
 
 type TipoRequestQueryPets = {
-  adotado?: boolean;
+  adotado?: string;
   nome?: string;
   especie?: string;
   porte?: string;

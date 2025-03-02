@@ -1,88 +1,29 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: AdotaPet API
-  version: '1.0.0'
-  description: API para gerenciamento de usuários, adotantes, pets e endereços.
+  title: API de Adoção de Pets
+  description: API para gerenciamento de abrigos, adotantes e pets
+  version: 1.0.0
 servers:
   - url: http://localhost:3000
+    description: Servidor local de desenvolvimento
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   schemas:
-    ErrorResponse:
+    Error:
       type: object
       properties:
-        error:
-          type: string
         message:
           type: string
-    UsuarioResponse:
-      type: object
-      properties:
-        data:
+        details:
           type: object
-          properties:
-            id:
-              type: integer
-            nome:
-              type: string
-            celular:
-              type: string
-    CreateUsuario:
-      type: object
-      required:
-        - nome
-        - email
-        - senha
-      properties:
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        senha:
-          type: string
-        celular:
-          type: string
-          description: Número de celular (opcional)
-    UpdateUsuario:
-      type: object
-      properties:
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        senha:
-          type: string
-        celular:
-          type: string
-    UsuarioLogin:
-      type: object
-      properties:
-        id:
-          type: integer
-        nome:
-          type: string
-        celular:
-          type: string
-    Usuario:
-      type: object
-      properties:
-        id:
-          type: integer
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        celular:
-          type: string
-        adotante:
-          $ref: '#/components/schemas/Adotante'
+          nullable: true
+
     LoginRequest:
       type: object
       required:
@@ -94,7 +35,50 @@ components:
           format: email
         senha:
           type: string
-    Endereco:
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+
+    CreateUsuarioDto:
+      type: object
+      required:
+        - nome
+        - email
+        - senha
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+          format: password
+          description: Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial
+        celular:
+          type: string
+          nullable: true
+
+    UpdateUsuarioDto:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+          format: password
+          description: Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial
+        celular:
+          type: string
+
+    EnderecoDto:
       type: object
       required:
         - cidade
@@ -104,181 +88,22 @@ components:
           type: string
         estado:
           type: string
-    Adotante:
-      type: object
-      properties:
-        id:
-          type: integer
-        usuario:
-          $ref: '#/components/schemas/Usuario'
-        endereco:
-          $ref: '#/components/schemas/Endereco'
-        pets:
-          type: array
-          items:
-            $ref: '#/components/schemas/Pet'
-    AdocaoPets:
-      type: object
-      required:
-        - petIds
-      properties:
-        petIds:
-          type: array
-          items:
-            type: integer
-    CreatePet:
-      type: object
-      required:
-        - nome
-        - especie
-        - dataNascimento
-      properties:
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date
-        adotado:
-          type: boolean
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-    UpdatePet:
-      type: object
-      properties:
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date
-        adotado:
-          type: boolean
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-    Pet:
-      type: object
-      properties:
-        id:
-          type: integer
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date
-        adotado:
-          type: boolean
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-        adotante:
-          $ref: '#/components/schemas/Adotante'
-    PetResponse:
-      type: object
-      properties:
-        adotado:
-          type: boolean
-        nome:
-          type: string
-        especie:
-          type: string
-          enum:
-            - cachorro
-            - gato
-            - passaro
-            - tartaruga
-        dataNascimento:
-          type: string
-          format: date-time
-        porte:
-          type: string
-          enum:
-            - pequeno
-            - medio
-            - grande
-    AdotanteListItem:
-      type: object
-      properties:
-        usuario:
-          type: object
-          properties:
-            nome:
-              type: string
-            email:
-              type: string
-              format: email
-            celular:
-              type: string
-        endereco:
-          type: object
-          properties:
-            cidade:
-              type: string
-            estado:
-              type: string
-        pets:
-          type: array
-          items:
-            type: object
-            properties:
-              nome:
-                type: string
-              especie:
-                type: string
-                enum:
-                  - cachorro
-                  - gato
-                  - passaro
-                  - tartaruga
-              adotado:
-                type: boolean
-              dataNascimento:
-                type: string
-                format: date
-              porte:
-                type: string
-                enum:
-                  - pequeno
-                  - medio
-                  - grande
-    AdotanteListResponse:
+
+    UsuarioResponse:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdotanteListItem'
-    EnderecoUpdateResponse:
+          type: object
+          properties:
+            id:
+              type: string
+            nome:
+              type: string
+            celular:
+              type: string
+              nullable: true
+
+    EnderecoResponse:
       type: object
       properties:
         data:
@@ -291,9 +116,9 @@ components:
                   type: string
                 email:
                   type: string
-                  format: email
                 celular:
                   type: string
+                  nullable: true
             endereco:
               type: object
               properties:
@@ -301,89 +126,196 @@ components:
                   type: string
                 estado:
                   type: string
+
+    AdotanteResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              usuario:
+                type: object
+                properties:
+                  nome:
+                    type: string
+                  email:
+                    type: string
+                  celular:
+                    type: string
+                    nullable: true
+              endereco:
+                type: object
+                nullable: true
+                properties:
+                  cidade:
+                    type: string
+                  estado:
+                    type: string
+              pets:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PetBasic'
+
+    AdocaoPetsDto:
+      type: object
+      required:
+        - petIds
+      properties:
+        petIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+    PetBasic:
+      type: object
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum: [CACHORRO, GATO, AVE, OUTRO]
+        adotado:
+          type: boolean
+        dataNascimento:
+          type: string
+          format: date
+        porte:
+          type: string
+          enum: [PEQUENO, MEDIO, GRANDE]
+
+    PetFull:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        nome:
+          type: string
+        especie:
+          type: string
+          enum: [CACHORRO, GATO, AVE, OUTRO]
+        adotado:
+          type: boolean
+        dataNascimento:
+          type: string
+          format: date
+        porte:
+          type: string
+          enum: [PEQUENO, MEDIO, GRANDE]
+
+    PetResponse:
+      type: object
+      properties:
+        data:
+          oneOf:
+            - type: object
+              $ref: '#/components/schemas/PetFull'
+            - type: array
+              items:
+                $ref: '#/components/schemas/PetFull'
+
+    PetsAdotadosResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              pets:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PetFull'
+              errors:
+                type: array
+                items:
+                  type: string
+                nullable: true
+
+    CreatePetDto:
+      type: object
+      required:
+        - nome
+        - especie
+        - porte
+        - dataNascimento
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum: [CACHORRO, GATO, AVE, OUTRO]
+        porte:
+          type: string
+          enum: [PEQUENO, MEDIO, GRANDE]
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+          default: false
+
+    UpdatePetDto:
+      type: object
+      properties:
+        nome:
+          type: string
+        especie:
+          type: string
+          enum: [CACHORRO, GATO, AVE, OUTRO]
+        porte:
+          type: string
+          enum: [PEQUENO, MEDIO, GRANDE]
+        dataNascimento:
+          type: string
+          format: date
+        adotado:
+          type: boolean
+
+  responses:
+    UnauthorizedError:
+      description: Acesso não autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    BadRequestError:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ConflictError:
+      description: Conflito de recursos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
 security:
   - bearerAuth: []
+
 paths:
-  /usuarios:
-    post:
-      summary: Cria um novo usuário
-      tags:
-        - Usuários
-      security: [] # Endpoint público
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateUsuario'
-      responses:
-        '201':
-          description: Usuário criado com sucesso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UsuarioResponse'
-        '409':
-          description: Conflito - E-mail ou celular já cadastrados
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Erro interno no servidor
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /usuarios/{id}:
-    put:
-      summary: Atualiza um usuário existente
-      tags:
-        - Usuários
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-          description: ID do usuário a ser atualizado
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateUsuario'
-      responses:
-        '200':
-          description: Usuário atualizado com sucesso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UsuarioResponse'
-    delete:
-      summary: Exclui um usuário
-      tags:
-        - Usuários
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-          description: ID do usuário a ser excluído
-      responses:
-        '204':
-          description: Usuário excluído com sucesso
   /usuarios/login:
     post:
-      summary: Autentica um usuário e retorna um token JWT
       tags:
-        - Usuários
-      security: [] # Endpoint público
+        - Autenticação
+      summary: Realiza login no sistema
+      security: []
       requestBody:
         required: true
         content:
@@ -392,35 +324,254 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Usuário autenticado com sucesso, retornando token JWT
+          description: Login realizado com sucesso
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  accessToken:
-                    type: string
-  /pets:
-    get:
-      summary: Lista todos os pets não adotados
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /usuarios/adotante:
+    post:
       tags:
-        - Pets
-      security: [] # Endpoint público
+        - Usuários
+      summary: Cria um novo usuário do tipo adotante
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUsuarioDto'
+      responses:
+        '201':
+          description: Usuário adotante criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /usuarios/abrigo:
+    post:
+      tags:
+        - Usuários
+      summary: Cria um novo usuário do tipo abrigo
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUsuarioDto'
+      responses:
+        '201':
+          description: Usuário abrigo criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /usuarios/{id}:
+    put:
+      tags:
+        - Usuários
+      summary: Atualiza um usuário existente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUsuarioDto'
       responses:
         '200':
-          description: Lista de pets
+          description: Usuário atualizado com sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-    post:
-      summary: Cria novos pets
+                $ref: '#/components/schemas/UsuarioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
       tags:
-        - Pets
-      security:
-        - bearerAuth: []
+        - Usuários
+      summary: Remove um usuário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Usuário removido com sucesso
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /adotantes:
+    get:
+      tags:
+        - Adotantes
+      summary: Lista todos os adotantes
+      responses:
+        '200':
+          description: Lista de adotantes retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdotanteResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /adotantes/{id}:
+    patch:
+      tags:
+        - Adotantes
+      summary: Atualiza o endereço de um adotante
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnderecoDto'
+      responses:
+        '200':
+          description: Endereço do adotante atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnderecoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /adotantes/{adotanteId}/pets:
+    put:
+      tags:
+        - Adotantes
+      summary: Adota um ou mais pets
+      parameters:
+        - name: adotanteId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdocaoPetsDto'
+      responses:
+        '200':
+          description: Pets adotados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetsAdotadosResponse'
+        '207':
+          description: Operação parcialmente bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetsAdotadosResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /abrigos:
+    get:
+      tags:
+        - Abrigos
+      summary: Lista todos os abrigos
+      responses:
+        '200':
+          description: Lista de abrigos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdotanteResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /abrigos/{id}:
+    patch:
+      tags:
+        - Abrigos
+      summary: Atualiza o endereço de um abrigo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnderecoDto'
+      responses:
+        '200':
+          description: Endereço do abrigo atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnderecoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /abrigos/{id}/pets:
+    post:
+      tags:
+        - Abrigos
+      summary: Cadastra um ou mais pets para um abrigo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -428,232 +579,125 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CreatePet'
+                $ref: '#/components/schemas/CreatePetDto'
       responses:
         '201':
-          description: Pets criados com sucesso
+          description: Pets cadastrados com sucesso
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/PetResponse'
-              example:
-                - adotado: false
-                  nome: 'Sam'
-                  especie: 'cachorro'
-                  dataNascimento: '2023-02-25T00:00:00.000Z'
-                  porte: 'medio'
-  /pets/{id}:
-    put:
-      summary: Atualiza um pet existente
-      tags:
-        - Pets
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-          description: ID do pet a ser atualizado
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdatePet'
-      responses:
-        '200':
-          description: Pet atualizado com sucesso
-          content:
-            application/json:
-              schema:
-                type: string
-                example: 'Atualizado com sucesso!'
-    delete:
-      summary: Exclui um pet
-      tags:
-        - Pets
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-          description: ID do pet a ser excluído
-      responses:
-        '204':
-          description: Pet excluído com sucesso
-  /pets/porte:
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /pets:
     get:
-      summary: Lista pets filtrados por porte
       tags:
         - Pets
-      security: [] # Endpoint público
-      parameters:
-        - in: query
-          name: porte
-          required: false
-          schema:
-            type: string
-          description: Porte do pet (pequeno, medio, grande)
+      summary: Lista todos os pets disponíveis para adoção
+      security: []
       responses:
         '200':
-          description: Lista de pets filtrados por porte
+          description: Lista de pets retornada com sucesso
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
+                  $ref: '#/components/schemas/PetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   /pets/search:
     get:
-      summary: Pesquisa pets por critérios
       tags:
         - Pets
+      summary: Busca pets por critérios
       security: []
       parameters:
-        - in: query
-          name: adotado
+        - name: adotado
+          in: query
+          required: false
           schema:
             type: boolean
-          description: Filtra por status de adoção
+        - name: nome
+          in: query
           required: false
-        - in: query
-          name: nome
           schema:
             type: string
-          description: Filtra por nome do pet (case insensitive)
+        - name: especie
+          in: query
           required: false
-        - in: query
-          name: especie
           schema:
             type: string
-          description: Filtra por espécie (cachorro, gato, etc.)
+            enum: [cachorro, gato, passaro, tartaruga]
+        - name: porte
+          in: query
           required: false
-        - in: query
-          name: porte
           schema:
             type: string
-          description: Filtra por porte (pequeno, médio, grande)
-          required: false
+            enum: [pequeno, medio, grande]
       responses:
         '200':
-          description: Lista de pets filtrados
+          description: Lista de pets filtrada retornada com sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PetResponse'
-  /adotantes:
-    get:
-      summary: Lista todos os adotantes
-      tags:
-        - Adotantes
-      security: [] # Endpoint público
-      responses:
-        '200':
-          description: Lista de adotantes
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdotanteListResponse'
-  /adotantes/{id}:
+                $ref: '#/components/schemas/PetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /pets/{id}:
     put:
-      summary: Atualiza o endereço de um adotante
       tags:
-        - Adotantes
-      security:
-        - bearerAuth: []
+        - Pets
+      summary: Atualiza um pet
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
-            type: integer
-          description: ID do adotante cujo endereço será atualizado
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Endereco'
-      responses:
-        '200':
-          description: Endereço atualizado com sucesso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EnderecoUpdateResponse'
-    delete:
-      summary: Exclui um adotante
-      tags:
-        - Adotantes
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-          description: ID do adotante a ser excluído
+              $ref: '#/components/schemas/UpdatePetDto'
       responses:
         '204':
-          description: Adotante excluído com sucesso
-  /adotantes/{adotanteId}/pets:
-    put:
-      summary: Adota pets para um adotante
+          description: Pet atualizado com sucesso
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
       tags:
-        - Adotantes
-      security:
-        - bearerAuth: []
+        - Pets
+      summary: Remove um pet
       parameters:
-        - in: path
-          name: adotanteId
+        - name: id
+          in: path
           required: true
           schema:
-            type: integer
-          description: ID do adotante que adotará os pets
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdocaoPets'
+            type: string
       responses:
-        '200':
-          description: Pets adotados com sucesso
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  petsAdotados:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Pet'
-        '207':
-          description: Operação parcialmente bem-sucedida
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  petsAdotados:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Pet'
-                  erros:
-                    type: array
-                    items:
-                      type: string
+        '204':
+          description: Pet removido com sucesso
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'

@@ -1,6 +1,14 @@
 import { Especie } from '../enum/especie';
 /* eslint-disable indent */
-import { IsString, IsBoolean, IsOptional, IsEnum, IsDate, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsEnum,
+  IsDate,
+  IsNotEmpty,
+  isString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { Porte } from '../enum/porte';
 
@@ -52,13 +60,21 @@ export class UpdatePetDto {
 export class QueryPetDto {
   @IsOptional()
   @IsEnum(Especie, {
-    each: true // Valida cada item do array
+    each: true, // Valida cada item do array
   })
   especie?: Especie | Especie[];
 
   @IsOptional()
   @IsEnum(Porte, {
-    each: true // Valida cada item do array
+    each: true, // Valida cada item do array
   })
   porte?: Porte | Porte[];
+
+  @IsOptional()
+  @IsString({ each: true })
+  nome?: string | string[];
+
+  @IsOptional()
+  @IsString()
+  adotado?: string;
 }

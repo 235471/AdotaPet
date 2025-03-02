@@ -5,39 +5,36 @@ import { IPetController } from '../interface/PetController';
 import { validateDto } from '../middleware/validationMiddleware';
 import { CreatePetDto, QueryPetDto, UpdatePetDto } from '../dto/pet.dto';
 import { authentication } from '../middleware/authentication';
-import { petRep } from '../constants/repository';
+import { abrigoRep, petRep } from '../constants/repository';
 import { validateQueryParams } from '../middleware/validateQueryParams';
+import { AbrigoRepository } from '../repository/AbrigoRepository';
 
 const router = Router();
 
 const petRepository = new PetRepository(petRep);
-const petController: IPetController = new PetController(petRepository);
+const abrigoRepository = new AbrigoRepository(abrigoRep);
+const petController: IPetController = new PetController(petRepository, abrigoRepository);
 
-// Defina explicitamente os tipos dos parâmetros
-router.get('/', (req, res, next) => petController.listAll(req, res, next));
+router.get('/', petController.listAll.bind(petController));
 
-router.get('/porte', (req, res, next) => petController.listByPorte(req, res, next));
+router.get('/porte', petController.listByPorte.bind(petController));
 
-router.get('/search', validateQueryParams(QueryPetDto), (req, res, next) =>
-  petController.listBy(req, res, next)
-);
+router.get('/search', validateQueryParams(QueryPetDto), petController.listBy.bind(petController));
 
 router.post(
   '/',
-  (req, res, next) => authentication(req, res, next),
+  authentication,
   validateDto(CreatePetDto, { isArray: true, isUpdate: false }),
-  (req, res, next) => petController.createPets(req, res, next)
+  petController.createPets.bind(petController)
 );
+
 router.put(
   '/:id',
-  (req, res, next) => authentication(req, res, next),
+  authentication,
   validateDto(UpdatePetDto, { isUpdate: true }),
-  (req, res, next) => petController.updatePet(req, res, next)
+  petController.updatePet.bind(petController)
 );
-router.delete(
-  '/:id',
-  (req, res, next) => authentication(req, res, next),
-  (req, res, next) => petController.deletePet(req, res, next)
-);
+
+router.delete('/:id', authentication, petController.deletePet.bind(petController));
 
 export default router;

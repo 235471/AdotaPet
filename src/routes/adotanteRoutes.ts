@@ -14,26 +14,20 @@ const adotanteRepository = new AdotanteRepository(adotanteRep);
 const petRepository = new PetRepository(petRep);
 const adotanteController = new AdotanteController(adotanteRepository, petRepository);
 
-router.get('/', (req, res, next) => adotanteController.listAdotante(req, res, next));
+router.get('/', adotanteController.listAdotante.bind(adotanteController));
 
 router.patch(
   '/:id',
-  (req, res, next) => authentication(req, res, next),
+  authentication,
   validateDto(EnderecoDto, { isUpdate: true }),
-  (req, res, next) => adotanteController.updateEndereco(req, res, next)
-);
-
-router.delete(
-  '/:id',
-  (req, res, next) => authentication(req, res, next),
-  (req, res, next) => adotanteController.deleteAdotante(req, res, next)
+  adotanteController.updateEndereco.bind(adotanteController)
 );
 
 router.put(
   '/:adotanteId/pets',
-  (req, res, next) => authentication(req, res, next),
+  authentication,
   validateDto(adocaoPetsDto, { isUpdate: true }),
-  (req, res, next) => adotanteController.adotaPet(req, res, next)
+  adotanteController.adotaPet.bind(adotanteController)
 );
 
 export default router;

@@ -9,6 +9,5 @@ export interface InterfaceAdotanteRepository {
   adotarPet(adotante: AdotanteEntity, pet: PetEntity[]): Promise<TipoResponseBodyPetAdotado>;
   listAdotanteSemSenha(): Promise<TipoResponseBodyAdotantes>;
   findById(id: number): Promise<AdotanteDTOFormatted>;
-  deleteAdotante(id: number): Promise<void>;
   updateEndereco(id: number, endereco: EnderecoEntity): Promise<TipoResponseBodyEndereco>;
 }

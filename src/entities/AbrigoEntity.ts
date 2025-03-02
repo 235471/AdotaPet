@@ -4,8 +4,8 @@ import { PetEntity } from './PetEntity';
 import { EnderecoEntity } from './EnderecoEntity';
 import { UsuarioEntity } from './UsuarioEntity';
 
-@Entity('adotantes')
-export class AdotanteEntity {
+@Entity('abrigos')
+export class AbrigoEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -21,7 +21,7 @@ export class AdotanteEntity {
   @JoinColumn()
   endereco?: EnderecoEntity;
 
-  @OneToMany(() => PetEntity, (pet) => pet.adotante, { cascade: true })
+  @OneToMany(() => PetEntity, (pet) => pet.abrigo, { cascade: true })
   pets: PetEntity[];
 
   constructor(usuario: UsuarioEntity, pets: PetEntity[], endereco?: EnderecoEntity) {

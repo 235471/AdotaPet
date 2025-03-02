@@ -3,33 +3,40 @@ import { UsuarioController } from '../controller/UsuarioController';
 import { UsuarioRepository } from '../repository/UsuarioRepository';
 import { validateDto } from '../middleware/validationMiddleware';
 import { CreateUsuarioDto, UpdateUsuarioDto } from '../dto/usuario.dto';
-import { adotanteRep, usuarioRep } from '../constants/repository';
+import { abrigoRep, adotanteRep, usuarioRep } from '../constants/repository';
 import { authentication } from '../middleware/authentication';
+import { CreateAbrigoDto } from '../dto/abrigo.dto';
+import { addTipoUsuario } from '../middleware/tipoUsuario';
+import { UserTypes } from '../enum/userTypes';
 
 const router = Router();
 
-const usuarioRepository = new UsuarioRepository(usuarioRep, adotanteRep);
+const usuarioRepository = new UsuarioRepository(usuarioRep, adotanteRep, abrigoRep);
 const usuarioController = new UsuarioController(usuarioRepository);
 
 router.post(
-  '/',
+  '/adotante',
   validateDto(CreateUsuarioDto),
-  (req, res, next) => usuarioController.createUsuario(req, res, next)
+  addTipoUsuario(UserTypes.adotante),
+  usuarioController.createUsuario.bind(usuarioController)
+);
+
+router.post(
+  '/abrigo',
+  validateDto(CreateAbrigoDto),
+  addTipoUsuario(UserTypes.abrigo),
+  usuarioController.createUsuario.bind(usuarioController)
 );
 
 router.put(
   '/:id',
-  (req, res, next) => authentication(req, res, next),
+  authentication,
   validateDto(UpdateUsuarioDto, { isUpdate: true }),
-  (req, res, next) => usuarioController.updateUsuario(req, res, next)
+  usuarioController.updateUsuario.bind(usuarioController)
 );
 
-router.delete(
-  '/:id',
-  (req, res, next) => authentication(req, res, next),
-  (req, res, next) => usuarioController.deleteUsuario(req, res, next)
-);
+router.delete('/:id', authentication, usuarioController.deleteUsuario.bind(usuarioController));
 
-router.post('/login', (req, res, next) => usuarioController.login(req, res, next));
+router.post('/login', usuarioController.login.bind(usuarioController));
 
 export default router;
